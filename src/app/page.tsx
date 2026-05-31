@@ -1,29 +1,32 @@
-import { HeroPickerCard } from "@/components/hero/HeroPickerCard";
-import { counters } from "@/data/counters";
-import { heroes } from "@/data/heroes";
+import { Navbar } from '@/components/navbar'
+import { CounterAnalyzer } from '@/components/counter-analyzer'
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <main className="min-h-[100dvh] overflow-hidden bg-slate-950 px-6 py-8 text-slate-50">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top,#155e75_0,#0f172a_42%,#020617_100%)]" />
-      <div className="pointer-events-none fixed left-1/2 top-12 h-64 w-64 -translate-x-1/2 rounded-full bg-cyan-400/20 blur-3xl" />
-
-      <section className="relative mx-auto flex min-h-[calc(100vh-5rem)] max-w-6xl flex-col items-center justify-center gap-10 text-center">
-        <div className="max-w-3xl space-y-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.45em] text-cyan-300">
-            MLBB Analyzer
-          </p>
-          <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl">
-            Temukan counter hero sebelum draft jadi masalah.
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      
+      <main className="flex-1 container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+            Hero Counter Analyzer
           </h1>
-          <p className="mx-auto max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
-            Pilih hero lawan, lalu analyzer membantu membaca ancaman, counter,
-            dan alasan rekomendasi pick.
+          <p className="text-muted-foreground max-w-md mx-auto">
+            Analyze enemy hero weaknesses and reveal the strongest counter picks.
           </p>
         </div>
 
-        <HeroPickerCard heroes={heroes} counters={counters} />
-      </section>
-    </main>
-  );
+        {/* Main Analyzer */}
+        <CounterAnalyzer />
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border py-4">
+        <div className="container mx-auto px-4 text-center text-xs text-muted-foreground">
+          MLBB Counter Analyzer is not affiliated with Moonton
+        </div>
+      </footer>
+    </div>
+  )
 }
