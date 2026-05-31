@@ -1,0 +1,44 @@
+[
+  {
+    "id": "tigreal",
+    "name": "Tigreal",
+    "roles": ["tank"],
+    "lanes": ["roam"],
+    "tags": ["cc-heavy", "engage", "frontline", "teamfight"]
+  },
+  {
+    "id": "diggie",
+    "name": "Diggie",
+    "roles": ["support"],
+    "lanes": ["roam"],
+    "tags": ["anti-cc", "disengage", "protect", "teamfight"]
+  },
+  {
+    "id": "chou",
+    "name": "Chou",
+    "roles": ["fighter"],
+    "lanes": ["exp", "roam"],
+    "tags": ["pickoff", "displacement", "mobility"]
+  },
+  {
+    "id": "valir",
+    "name": "Valir",
+    "roles": ["mage"],
+    "lanes": ["mid"],
+    "tags": ["poke", "anti-engage", "knockback"]
+  },
+  {
+    "id": "karrie",
+    "name": "Karrie",
+    "roles": ["marksman"],
+    "lanes": ["gold"],
+    "tags": ["tank-shred", "late-game", "sustained-damage"]
+  },
+  {
+    "id": "akai",
+    "name": "Akai",
+    "roles": ["tank"],
+    "lanes": ["jungle", "roam"],
+    "tags": ["displacement", "zone-control", "engage"]
+  }
+]
