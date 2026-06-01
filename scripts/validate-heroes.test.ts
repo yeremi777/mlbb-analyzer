@@ -2,14 +2,14 @@ import assert from "node:assert/strict";
 import { validateHeroesData } from "./validate-heroes";
 
 const validHero = {
-  id: "ruby",
-  officialId: "",
+  uid: "ruby",
+  mlid: "29",
   name: "Ruby",
-  imageUrl: "",
+  images: {
+    head: "https://example.com/ruby.png",
+  },
   roles: ["fighter"],
   lanes: ["exp"],
-  sourceRefs: ["manual-curation:starter-v1"],
-  updatedAt: "2026-06-01",
 };
 
 function messagesFor(heroes: unknown): string[] {
@@ -25,15 +25,27 @@ assert.match(
 );
 
 assert.match(
-  messagesFor([{ ...validHero }, { ...validHero }]).join("\n"),
-  /duplicate.*ruby/i,
-  "duplicate hero IDs should produce a clear error",
+  messagesFor([{ ...validHero, images: { smallmap: "" } }]).join("\n"),
+  /images\.head.*string/i,
+  "head image should be validated",
 );
 
 assert.match(
-  messagesFor([{ ...validHero, id: "Ruby Hero" }]).join("\n"),
-  /lowercase kebab-case/i,
-  "hero IDs should be lowercase kebab-case",
+  messagesFor([{ ...validHero, images: { head: "", smallmap: 123 } }]).join("\n"),
+  /images\.smallmap.*string/i,
+  "optional smallmap image should be validated when present",
+);
+
+assert.match(
+  messagesFor([{ ...validHero }, { ...validHero }]).join("\n"),
+  /duplicate.*ruby/i,
+  "duplicate hero UIDs should produce a clear error",
+);
+
+assert.match(
+  messagesFor([{ ...validHero, uid: "Ruby Hero" }]).join("\n"),
+  /lowercase uid format/i,
+  "hero UIDs should use lowercase uid format",
 );
 
 assert.match(
@@ -48,16 +60,16 @@ assert.match(
   "lanes should be limited to allowed values",
 );
 
-assert.match(
-  messagesFor([{ ...validHero, sourceRefs: [] }]).join("\n"),
-  /sourceRefs.*non-empty/i,
-  "sourceRefs should be required",
+assert.equal(
+  messagesFor([{ ...validHero, sourceRefs: [] }]).length,
+  0,
+  "sourceRefs should be optional and may be empty while pending manual fill",
 );
 
 assert.match(
-  messagesFor([{ ...validHero, updatedAt: "06/01/2026" }]).join("\n"),
-  /updatedAt.*ISO date/i,
-  "updatedAt should be an ISO date string",
+  messagesFor([{ ...validHero, sourceRefs: [""] }]).join("\n"),
+  /sourceRefs.*non-empty/i,
+  "sourceRefs should contain only non-empty strings when present",
 );
 
 assert.match(

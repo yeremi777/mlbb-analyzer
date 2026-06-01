@@ -4,7 +4,7 @@ import heroesData from "../../public/data/heroes.json";
 export const heroes = heroesData as Hero[];
 
 export const heroById = new Map<string, Hero>(
-  heroes.map((hero) => [hero.id, hero]),
+  heroes.map((hero) => [hero.uid, hero]),
 );
 
 export function getHeroById(heroId: string): Hero | undefined {

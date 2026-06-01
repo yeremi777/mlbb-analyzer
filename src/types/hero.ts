@@ -13,12 +13,14 @@ export type HeroRole = (typeof HERO_ROLES)[number];
 export type HeroLane = (typeof HERO_LANES)[number];
 
 export type Hero = {
-  id: string;
-  officialId: string;
+  uid: string;
+  mlid: string;
   name: string;
-  imageUrl: string;
+  images: {
+    head: string;
+    smallmap?: string;
+  };
   roles: HeroRole[];
   lanes: HeroLane[];
-  sourceRefs: string[];
-  updatedAt: string;
+  sourceRefs?: string[];
 };

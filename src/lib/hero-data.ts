@@ -41,10 +41,10 @@ const roleLabelById: Record<DatasetHeroRole, HeroRole> = {
 
 function toUiHero(hero: DatasetHero): Hero {
   return {
-    id: hero.id,
+    id: hero.uid,
     name: hero.name,
     role: roleLabelById[hero.roles[0]] ?? "Fighter",
-    portrait: hero.imageUrl,
+    portrait: hero.images.head,
     roles: hero.roles,
     lanes: hero.lanes,
   };

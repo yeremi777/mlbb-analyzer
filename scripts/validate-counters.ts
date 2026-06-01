@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 type HeroRecord = {
-  id?: unknown;
+  uid?: unknown;
 };
 
 type CounterRecord = {
@@ -45,12 +45,12 @@ export function validateCountersData(input: ValidateCountersInput): ValidationRe
 
   const heroIds = new Set<string>();
   input.heroes.forEach((hero: HeroRecord, index: number) => {
-    if (!isRecord(hero) || typeof hero.id !== "string" || hero.id.trim() === "") {
-      errors.push(`hero entry #${index + 1} must have a non-empty string id`);
+    if (!isRecord(hero) || typeof hero.uid !== "string" || hero.uid.trim() === "") {
+      errors.push(`hero entry #${index + 1} must have a non-empty string uid`);
       return;
     }
 
-    heroIds.add(hero.id);
+    heroIds.add(hero.uid);
   });
 
   const seenPairs = new Set<string>();

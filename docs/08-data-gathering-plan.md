@@ -50,7 +50,7 @@ public/data/
 ### Flow
 
 1. **Source approval**: confirm the source is documented in `docs/01-data-source-research.md` and explicitly approved for the intended access pattern.
-2. **Raw capture**: a future manual-only fetch script may write a timestamped snapshot into `public/data/raw/official-heroes/`.
+2. **Raw capture**: a manual-only fetch script writes timestamped snapshots into `public/data/raw/official-heroes/` for explicit approved URLs only.
 3. **Raw review**: inspect the snapshot for source permissions, attribution needs, field meaning, missing fields, ambiguity, and data quality.
 4. **Normalization**: convert only approved and understood fields into `public/data/heroes.json` using the documented schema.
 5. **Human review**: review normalized output before app/analyzer use. Empty or ambiguous fields should stay empty instead of being guessed.
@@ -61,9 +61,10 @@ public/data/
 - Raw snapshots are evidence, not app data.
 - `public/data/heroes.json` is the reviewed app source of truth.
 - Generated normalized data is not trusted until it passes human review and validation.
-- Automated scraping, scheduled crawling, ID enumeration, and direct raw-to-app writes are out of scope until explicitly approved by a future task.
+- Automated scheduled crawling, ID enumeration, and direct raw-to-app writes are out of scope until explicitly approved by a future task.
+- The manual fetch script must only fetch explicit approved URLs supplied by the operator and must write raw snapshots for review.
 
-This section documents the intended design only. It does not add fetch scripts, scraping logic, generated data, or automated ingestion.
+This section documents the intended design and boundaries for manual raw snapshot ingestion.
 
 ## Source Audit Notes
 

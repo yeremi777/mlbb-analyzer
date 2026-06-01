@@ -6,8 +6,7 @@ const HERO_LANES = ["exp", "gold", "mid", "roam", "jungle"] as const;
 
 const HERO_ROLE_SET = new Set<string>(HERO_ROLES);
 const HERO_LANE_SET = new Set<string>(HERO_LANES);
-const HERO_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const HERO_UID_PATTERN = /^[a-z0-9]+(?:[.-][a-z0-9]+)*$/;
 
 export type ValidationResult = {
   valid: boolean;
@@ -15,14 +14,13 @@ export type ValidationResult = {
 };
 
 type HeroRecord = {
-  id?: unknown;
-  officialId?: unknown;
+  uid?: unknown;
+  mlid?: unknown;
   name?: unknown;
-  imageUrl?: unknown;
+  images?: unknown;
   roles?: unknown;
   lanes?: unknown;
   sourceRefs?: unknown;
-  updatedAt?: unknown;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -30,24 +28,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function describeHero(hero: HeroRecord, index: number): string {
-  const id = typeof hero.id === "string" && hero.id.trim() !== "" ? hero.id : `#${index + 1}`;
-  return `hero entry #${index + 1} (${id})`;
-}
-
-function isValidIsoDateString(value: string): boolean {
-  if (!ISO_DATE_PATTERN.test(value)) {
-    return false;
-  }
-
-  const date = new Date(`${value}T00:00:00.000Z`);
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+  const uid = typeof hero.uid === "string" && hero.uid.trim() !== "" ? hero.uid : `#${index + 1}`;
+  return `hero entry #${index + 1} (${uid})`;
 }
 
 function validateStringField(
   hero: HeroRecord,
   label: string,
-  field: keyof Pick<HeroRecord, "id" | "officialId" | "name" | "imageUrl" | "updatedAt">,
-  options: { allowEmpty?: boolean } = {},
+  field: keyof Pick<HeroRecord, "uid" | "mlid" | "name">,
 ): string[] {
   const value = hero[field];
 
@@ -55,11 +43,29 @@ function validateStringField(
     return [`${label} ${field} must be a string`];
   }
 
-  if (!options.allowEmpty && value.trim() === "") {
+  if (value.trim() === "") {
     return [`${label} ${field} must be a non-empty string`];
   }
 
   return [];
+}
+
+function validateImages(value: unknown, label: string): string[] {
+  const errors: string[] = [];
+
+  if (!isRecord(value)) {
+    return [`${label} images must be an object`];
+  }
+
+  if (typeof value.head !== "string") {
+    errors.push(`${label} images.head must be a string`);
+  }
+
+  if ("smallmap" in value && typeof value.smallmap !== "string") {
+    errors.push(`${label} images.smallmap must be a string when present`);
+  }
+
+  return errors;
 }
 
 function validateStringArray(
@@ -100,7 +106,7 @@ export function validateHeroesData(heroes: unknown): ValidationResult {
     return { valid: false, errors: ["heroes dataset must be an array"] };
   }
 
-  const seenHeroIds = new Set<string>();
+  const seenHeroUids = new Set<string>();
 
   heroes.forEach((value: unknown, index: number) => {
     if (!isRecord(value)) {
@@ -111,21 +117,20 @@ export function validateHeroesData(heroes: unknown): ValidationResult {
     const hero = value as HeroRecord;
     const label = describeHero(hero, index);
 
-    errors.push(...validateStringField(hero, label, "id"));
-    errors.push(...validateStringField(hero, label, "officialId", { allowEmpty: true }));
+    errors.push(...validateStringField(hero, label, "uid"));
+    errors.push(...validateStringField(hero, label, "mlid"));
     errors.push(...validateStringField(hero, label, "name"));
-    errors.push(...validateStringField(hero, label, "imageUrl", { allowEmpty: true }));
-    errors.push(...validateStringField(hero, label, "updatedAt"));
+    errors.push(...validateImages(hero.images, label));
 
-    if (typeof hero.id === "string") {
-      if (!HERO_ID_PATTERN.test(hero.id)) {
-        errors.push(`${label} id must be lowercase kebab-case`);
+    if (typeof hero.uid === "string") {
+      if (!HERO_UID_PATTERN.test(hero.uid)) {
+        errors.push(`${label} uid must use lowercase uid format`);
       }
 
-      if (seenHeroIds.has(hero.id)) {
-        errors.push(`${label} has duplicate hero id "${hero.id}"`);
+      if (seenHeroUids.has(hero.uid)) {
+        errors.push(`${label} has duplicate hero uid "${hero.uid}"`);
       } else {
-        seenHeroIds.add(hero.id);
+        seenHeroUids.add(hero.uid);
       }
     }
 
@@ -143,10 +148,9 @@ export function validateHeroesData(heroes: unknown): ValidationResult {
         allowedLabel: "lanes",
       }),
     );
-    errors.push(...validateStringArray(hero.sourceRefs, label, "sourceRefs", { requireNonEmpty: true }));
 
-    if (typeof hero.updatedAt === "string" && !isValidIsoDateString(hero.updatedAt)) {
-      errors.push(`${label} updatedAt must be an ISO date string in YYYY-MM-DD format`);
+    if (hero.sourceRefs !== undefined) {
+      errors.push(...validateStringArray(hero.sourceRefs, label, "sourceRefs", { requireNonEmpty: false }));
     }
   });
 

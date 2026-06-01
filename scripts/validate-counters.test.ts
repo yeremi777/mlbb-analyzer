@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { validateCountersData } from "./validate-counters";
 
 const heroes = [
-  { id: "tigreal", name: "Tigreal" },
-  { id: "diggie", name: "Diggie" },
+  { uid: "tigreal", name: "Tigreal" },
+  { uid: "diggie", name: "Diggie" },
 ];
 
 const validCounter = {

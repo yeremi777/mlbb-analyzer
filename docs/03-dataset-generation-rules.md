@@ -64,7 +64,7 @@ Rules:
 - Keep normalized app data under `public/data/`, especially `public/data/heroes.json`.
 - Preserve `sourceRefs` so every normalized record points back to reviewed evidence or an internal manual-curation reference.
 - Normalize only fields whose meaning is understood and allowed by the source audit.
-- Leave `officialId`, `imageUrl`, or `lanes` empty when the raw source is missing, ambiguous, or not manually reviewed.
+- Leave `mlid`, `images.head`, `images.smallmap`, or `lanes` empty when the raw source is missing, ambiguous, or not manually reviewed.
 - Do not infer lane assignments from role alone.
 - Do not infer matchup scores, counter reasons, or tags from official hero identity data.
 - Review generated output before use, then run the relevant validation command.

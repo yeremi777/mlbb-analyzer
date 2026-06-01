@@ -28,14 +28,16 @@ export type HeroRole = (typeof HERO_ROLES)[number];
 export type HeroLane = (typeof HERO_LANES)[number];
 
 export type Hero = {
-  id: string;
-  officialId: string;
+  uid: string;
+  mlid: string;
   name: string;
-  imageUrl: string;
+  images: {
+    head: string;
+    smallmap?: string;
+  };
   roles: HeroRole[];
   lanes: HeroLane[];
-  sourceRefs: string[];
-  updatedAt: string;
+  sourceRefs?: string[];
 };
 
 export type CounterMatchup = {
@@ -58,42 +60,45 @@ export type CounterRule = {
 
 ## Hero Fields
 
-- `id`: stable project ID in lowercase kebab-case, used by UI and analyzer links.
-- `officialId`: official MLBB hero ID when it has been manually verified, otherwise an empty string.
+- `uid`: stable hero UID from the provided hero meta dataset, used by UI and analyzer links.
+- `mlid`: official MLBB hero ID from the provided hero meta dataset.
 - `name`: display name shown in the selector and result cards.
-- `imageUrl`: verified official display image URL when available, otherwise an empty string.
+- `images.head`: portrait URL from the provided `portrait` field.
+- `images.smallmap`: optional verified official small-map or alternate display image URL.
 - `roles`: one or more allowed role IDs; the primary role must be first. Allowed values: `tank`, `fighter`, `assassin`, `mage`, `marksman`, and `support`.
 - `lanes`: zero or more project lane IDs. Allowed values: `exp`, `gold`, `mid`, `roam`, and `jungle`.
-- `sourceRefs`: reviewed source references used for the record. Use a URL for external sources or an internal reference such as `manual-curation:starter-v1` for project-created starter data. It must not be empty.
-- `updatedAt`: last manual update date in `YYYY-MM-DD` format.
+- `sourceRefs`: optional reviewed source references. It can be filled manually later.
 
 ## Hero Examples
 
 ```json
 {
-  "id": "tigreal",
-  "officialId": "6",
+  "uid": "tigreal",
+  "mlid": "6",
   "name": "Tigreal",
-  "imageUrl": "",
+  "images": {
+    "head": "https://akmweb.youngjoygame.com/web/svnres/img/mlbb/homepage/100_8b30576754be1a4f8bebd09df8d6bec7.png",
+    "smallmap": "https://akmweb.youngjoygame.com/web/svnres/img/mlbb/homepage/100_4e0005dbfb1376beaccc54ef7aa39375.png"
+  },
   "roles": ["tank"],
   "lanes": ["roam"],
   "sourceRefs": [
     "https://www.mobilelegends.com/hero/detail?channelid=2678742&heroid=6"
-  ],
-  "updatedAt": "2026-06-01"
+  ]
 }
 ```
 
 ```json
 {
-  "id": "diggie",
-  "officialId": "",
+  "uid": "diggie",
+  "mlid": "48",
   "name": "Diggie",
-  "imageUrl": "",
+  "images": {
+    "head": "https://example.com/diggie.png"
+  },
   "roles": ["support"],
   "lanes": ["roam"],
-  "sourceRefs": ["manual-curation:starter-v1"],
-  "updatedAt": "2026-06-01"
+  "sourceRefs": ["manual-curation:starter-v1"]
 }
 ```
 
@@ -136,24 +141,24 @@ npm run validate:heroes
 The hero validator checks that:
 
 - the dataset is a JSON array of hero objects;
-- required string fields are present (`id`, `officialId`, `name`, `imageUrl`, and `updatedAt`), with `officialId` and `imageUrl` allowed to be empty while unknown;
-- `id` is unique and uses lowercase kebab-case;
+- required string fields are present (`uid`, `mlid`, and `name`);
+- `images` is an object with a string `head` field and optional string `smallmap` field;
+- `uid` is unique and uses lowercase UID format;
 - `roles` is a non-empty array of allowed role IDs;
 - `lanes` is an array containing only allowed lane IDs;
-- `sourceRefs` is a non-empty array of non-empty strings;
-- `updatedAt` is a valid ISO date string in `YYYY-MM-DD` format.
+- `sourceRefs`, when present, is an array of non-empty strings;
 
 The script prints all validation errors and exits non-zero when the dataset is invalid.
 
 ## Naming Rules
 
-- Hero IDs use lowercase kebab-case.
-- `officialId` should match the official MLBB hero ID when verified, or stay empty while unknown.
-- `imageUrl` should use the verified official display image URL when available, or stay empty while unknown.
+- Hero `uid` values use lowercase UID format and may include dots for official-style names such as `x.borg`.
+- `mlid` should match the official MLBB hero ID from the hero meta source.
+- `images.head` should use the provided portrait URL when available.
+- `images.smallmap` should use the verified official small-map or alternate display image URL when available.
 - `roles` should list the primary role first.
 - `lanes` should use project lane IDs such as `exp`, `gold`, `mid`, `roam`, and `jungle`.
-- `sourceRefs` must not be empty and should list reviewed source references for the record.
-- `updatedAt` uses `YYYY-MM-DD`.
+- `sourceRefs` is optional while references are being filled manually, but should list reviewed source references when known.
 - Scores use a 0-100 range.
 - Every matchup needs at least one human-readable reason.
 - Reasons should explain the interaction, not only state that one hero is good.

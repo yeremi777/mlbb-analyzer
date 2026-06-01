@@ -19,7 +19,7 @@ export function getCounterRecommendations({
   counters,
   limit,
 }: GetCounterRecommendationsInput): CounterRecommendation[] {
-  const heroById = new Map(heroes.map((hero) => [hero.id, hero]));
+  const heroById = new Map(heroes.map((hero) => [hero.uid, hero]));
 
   const recommendations = counters
     .filter((counter) => counter.targetHeroId === targetHeroId)

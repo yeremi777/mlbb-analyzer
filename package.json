@@ -10,7 +10,9 @@
     "validate:heroes": "tsx scripts/validate-heroes.ts",
     "validate:counters": "tsx scripts/validate-counters.ts",
     "test:heroes": "tsx scripts/validate-heroes.test.ts",
-    "test:counters": "tsx scripts/validate-counters.test.ts"
+    "test:counters": "tsx scripts/validate-counters.test.ts",
+    "fetch:official-heroes": "tsx scripts/fetch-official-heroes.ts",
+    "import:hero-meta": "tsx scripts/import-hero-meta.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

@@ -69,9 +69,9 @@ function HeroMark({
         glow ? "ring-2 ring-amber-300 shadow-[0_0_36px_rgba(245,158,11,0.3)]" : ""
       }`}
     >
-      {hero.imageUrl ? (
+      {hero.images.head ? (
         <Image
-          src={hero.imageUrl}
+          src={hero.images.head}
           alt={hero.name}
           fill
           sizes={imageSizes}
@@ -107,7 +107,7 @@ export function HeroPickerCard({ heroes, counters }: HeroPickerCardProps) {
   }, [heroes, search, selectedRole]);
 
   const selectedHero = useMemo(
-    () => heroes.find((hero) => hero.id === selectedHeroId) ?? null,
+    () => heroes.find((hero) => hero.uid === selectedHeroId) ?? null,
     [heroes, selectedHeroId],
   );
 
@@ -239,11 +239,11 @@ export function HeroPickerCard({ heroes, counters }: HeroPickerCardProps) {
         <div className="mt-4 grid max-h-[420px] gap-2 overflow-y-auto pr-1">
           {filteredHeroes.map((hero) => (
             <button
-              key={hero.id}
+              key={hero.uid}
               type="button"
-              onClick={() => chooseHero(hero.id)}
+              onClick={() => chooseHero(hero.uid)}
               className={`flex items-center gap-3 rounded-lg border p-3 text-left transition ${
-                selectedHeroId === hero.id
+                selectedHeroId === hero.uid
                   ? "border-amber-300/80 bg-amber-300/10"
                   : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]"
               }`}
@@ -304,7 +304,7 @@ export function HeroPickerCard({ heroes, counters }: HeroPickerCardProps) {
               onClick={() => {
                 const firstHero = filteredHeroes[0] ?? heroes[0];
                 if (firstHero) {
-                  chooseHero(firstHero.id);
+                  chooseHero(firstHero.uid);
                 }
               }}
               className="flex min-h-[320px] w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-white/10 bg-black/15 p-8 text-center transition hover:border-amber-300/50 hover:bg-amber-300/5"
