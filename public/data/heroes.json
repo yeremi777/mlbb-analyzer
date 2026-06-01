@@ -1306,7 +1306,7 @@
     "roles": ["fighter", "assassin"],
     "lanes": ["exp"],
     "images": {
-      "head": ""
+      "head": "https://akmweb.youngjoygame.com/web/svnres/img/mlbb/homepage_2_1_40/100_8143d7bbd4318d7c699908e808de885e.png"
     }
   },
   {
@@ -1316,7 +1316,7 @@
     "roles": ["support"],
     "lanes": ["roam"],
     "images": {
-      "head": ""
+      "head": "https://akmweb.youngjoygame.com/web/svnres/img/mlbb/homepage_2_1_42/100_df7603c292198bf4aa7b551d401ea5c1.png"
     }
   }
 ]
