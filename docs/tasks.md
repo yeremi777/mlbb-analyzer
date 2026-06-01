@@ -310,7 +310,7 @@ Non-Goals:
 
 ### chore: add counter dataset validation
 
-Status: Backlog
+Status: Done
 
 Goal:
 
@@ -342,9 +342,13 @@ Non-Goals:
 - Do not change scoring rules.
 - Do not add new matchup data.
 
+Completed:
+
+- 2026-06-01
+
 ### feat: expose typed data accessors for public data
 
-Status: Backlog
+Status: Done
 
 Goal:
 
@@ -372,6 +376,10 @@ Non-Goals:
 
 - Do not add a backend API route.
 - Do not fetch public JSON at runtime unless needed.
+
+Completed:
+
+- 2026-06-01
 
 ### feat: add AI explanation route
 
