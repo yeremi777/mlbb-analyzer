@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "validate:heroes": "tsx scripts/validate-heroes.ts",
+    "validate:counters": "tsx scripts/validate-counters.ts",
+    "test:heroes": "tsx scripts/validate-heroes.test.ts",
+    "test:counters": "tsx scripts/validate-counters.test.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -30,6 +34,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }

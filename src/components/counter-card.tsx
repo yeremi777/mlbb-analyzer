@@ -52,25 +52,27 @@ export function CounterCard({ counter, isRevealing = false, delay = 0 }: Counter
   
   if (isTopThree && config) {
     const Icon = config.icon
-    
+    const isRankOne = counter.rank === 1
+
     return (
       <div
         className={cn(
           'flex flex-col items-center text-center transition-all',
+          isRankOne ? 'w-[160px] pt-1' : 'w-[130px]',
           isRevealing && 'animate-reveal'
         )}
         style={{ animationDelay: isRevealing ? `${delay}ms` : '0ms' }}
       >
-        {/* Rank Badge */}
-        <div className={cn('flex items-center gap-1 mb-3', config.textClass)}>
+        {/* Rank Badge - fixed height */}
+        <div className={cn('flex items-center gap-1 h-6', config.textClass)}>
           <Icon className="h-4 w-4" />
           <span className="text-xs font-bold uppercase tracking-wider">
             {config.label}
           </span>
         </div>
-        
+
         {/* Circular Portrait with ring */}
-        <div className={cn('rounded-full', config.borderClass)}>
+        <div className={cn('rounded-full mt-2', config.borderClass)}>
           <HeroPortrait
             hero={counter}
             size={config.size}
@@ -78,25 +80,25 @@ export function CounterCard({ counter, isRevealing = false, delay = 0 }: Counter
             glowColor={config.glowColor}
           />
         </div>
-        
+
         {/* Hero Name */}
         <h3 className={cn(
           'font-bold text-foreground mt-3',
-          counter.rank === 1 ? 'text-lg' : 'text-base'
+          isRankOne ? 'text-lg' : 'text-base'
         )}>
           {counter.name}
         </h3>
-        
+
         {/* Role */}
         <p className="text-xs text-muted-foreground">{counter.role}</p>
-        
+
         {/* Score */}
         <div className={cn('mt-1', config.scoreClass)}>
           <span className="text-sm">{counter.counterScore}%</span>
         </div>
-        
-        {/* Tags */}
-        <div className="flex flex-wrap justify-center gap-1 mt-2">
+
+        {/* Tags - fixed height container */}
+        <div className="flex flex-wrap justify-center gap-1 mt-2 min-h-[24px]">
           {counter.tags.slice(0, 2).map(tag => (
             <Badge
               key={tag}

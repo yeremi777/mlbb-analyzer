@@ -1,0 +1,116 @@
+[
+  {
+    "id": "tigreal",
+    "officialId": "6",
+    "name": "Tigreal",
+    "imageUrl": "https://akmweb.youngjoygame.com/web/svnres/img/mlbb/homepage/100_4e0005dbfb1376beaccc54ef7aa39375.png",
+    "roles": ["tank"],
+    "lanes": ["roam"],
+    "sourceRefs": [
+      "https://www.mobilelegends.com/hero/detail?channelid=2678742&heroid=6"
+    ],
+    "updatedAt": "2026-06-01"
+  },
+  {
+    "id": "diggie",
+    "officialId": "",
+    "name": "Diggie",
+    "imageUrl": "",
+    "roles": ["support"],
+    "lanes": ["roam"],
+    "sourceRefs": ["manual-curation:starter-v1"],
+    "updatedAt": "2026-06-01"
+  },
+  {
+    "id": "chou",
+    "officialId": "",
+    "name": "Chou",
+    "imageUrl": "",
+    "roles": ["fighter"],
+    "lanes": ["exp", "roam"],
+    "sourceRefs": ["manual-curation:starter-v1"],
+    "updatedAt": "2026-06-01"
+  },
+  {
+    "id": "valir",
+    "officialId": "",
+    "name": "Valir",
+    "imageUrl": "",
+    "roles": ["mage"],
+    "lanes": ["mid"],
+    "sourceRefs": ["manual-curation:starter-v1"],
+    "updatedAt": "2026-06-01"
+  },
+  {
+    "id": "karrie",
+    "officialId": "",
+    "name": "Karrie",
+    "imageUrl": "",
+    "roles": ["marksman"],
+    "lanes": ["gold"],
+    "sourceRefs": ["manual-curation:starter-v1"],
+    "updatedAt": "2026-06-01"
+  },
+  {
+    "id": "akai",
+    "officialId": "",
+    "name": "Akai",
+    "imageUrl": "",
+    "roles": ["tank"],
+    "lanes": ["jungle", "roam"],
+    "sourceRefs": ["manual-curation:starter-v1"],
+    "updatedAt": "2026-06-01"
+  },
+  {
+    "id": "layla",
+    "officialId": "",
+    "name": "Layla",
+    "imageUrl": "",
+    "roles": ["marksman"],
+    "lanes": [],
+    "sourceRefs": [
+      "https://www.mobilelegends.com/hero",
+      "manual-curation:starter-v2"
+    ],
+    "updatedAt": "2026-06-01"
+  },
+  {
+    "id": "miya",
+    "officialId": "",
+    "name": "Miya",
+    "imageUrl": "",
+    "roles": ["marksman"],
+    "lanes": [],
+    "sourceRefs": [
+      "https://www.mobilelegends.com/hero",
+      "manual-curation:starter-v2"
+    ],
+    "updatedAt": "2026-06-01"
+  },
+  {
+    "id": "eudora",
+    "officialId": "",
+    "name": "Eudora",
+    "imageUrl": "",
+    "roles": ["mage"],
+    "lanes": [],
+    "sourceRefs": [
+      "https://www.mobilelegends.com/hero",
+      "manual-curation:starter-v2"
+    ],
+    "updatedAt": "2026-06-01"
+  },
+  {
+    "id": "balmond",
+    "officialId": "",
+    "name": "Balmond",
+    "imageUrl": "",
+    "roles": ["fighter"],
+    "lanes": [],
+    "sourceRefs": [
+      "https://www.mobilelegends.com/hero",
+      "manual-curation:starter-v2"
+    ],
+    "updatedAt": "2026-06-01"
+  }
+]

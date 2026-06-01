@@ -51,11 +51,18 @@ Use this table before relying on any source:
 
 | Source | URL | Data Available | Usage Type | Scraping Allowed? | Attribution Needed? | Risk Level | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Example official source | TBD | Hero names, roles, patch notes | Reference | TBD | TBD | Low to Medium | Verify current terms before use. |
+| Official Mobile Legends hero directory | https://www.mobilelegends.com/hero | Hero names, hero thumbnails/image URLs, role filters (`Tank`, `Fighter`, `Assassin`, `Mage`, `Marksman`, `Support`), lane filter UI, language selection, and links or page state for individual hero entries when available | Manual reference and source audit only | Not approved for automated scraping yet | Unknown; review Moonton Terms of Service and attribution requirements before reuse beyond manual references | Low to Medium for manually reviewed basic facts; Unknown for automated reuse until terms are reviewed | Observed as a rendered web app rather than simple static HTML. Browser inspection showed JavaScript assets plus API-backed/JSON-backed resources from `api.gms.moontontech.com`, `sg-api.mobilelegends.com`, and `akmweb.youngjoygame.com`. Do not run scraping, crawling, scheduled fetching, ID enumeration, or bulk import until explicitly approved and terms are reviewed. Safe manual-review fields for the next data task are hero name, official image URL, role, and lane if visible; leave uncertain fields empty instead of guessing. Future fetch scripts must use only explicitly documented official URLs, run manually only, write raw snapshots only, avoid bypassing source controls, and never write directly to normalized app data. |
+| Official Mobile Legends hero detail page pattern | https://www.mobilelegends.com/hero/detail?channelid=2678742&heroid=6 | Individual hero detail page for manually checking one known hero ID. The `heroid` query parameter identifies the hero, while `channelid` appears to identify the official site channel/page context. May expose official hero name, role, lane, and image data when rendered. | Manual reference only | Not approved for automated scraping yet | Unknown; terms and attribution still need review | Low to Medium for one-off manual verification; Unknown for automated enumeration | Correct official detail example for Tigreal. Keep as a manually reviewed example only. Do not enumerate `heroid` values, crawl detail pages, or assume `channelid` is stable until explicitly reviewed. |
 | Example community wiki | TBD | Hero details, skills, history | Reference with license review | TBD | TBD | Medium | Check license and attribution rules. |
 | Manual curation | Internal | Tags, scores, reasons | Original dataset | Not applicable | No | Low | Preferred for counter logic. |
 | Player profile source | TBD | Player ID, match history, favorite heroes, roles | Future player analysis | TBD | TBD | Unknown to High | Requires privacy and terms review before use. |
 | Pro gameplay source | TBD | Pro player stats, match VODs, clips | Future pro analysis | TBD | TBD | Unknown to High | Requires rights, attribution, and storage review. |
+
+## Starter Hero Records
+
+The current starter hero dataset is intentionally small and manually curated. For `manual-curation:starter-v2`, only hero names and broad primary roles that are confidently known were added. Official IDs, image URLs, and uncertain lane assignments stay empty until they are manually verified from an approved official page.
+
+Manual starter records may cite `https://www.mobilelegends.com/hero` as a source reference for basic official hero identity checks, but that citation does not approve automated scraping, crawling, scheduled fetching, bulk import, or ID enumeration.
 
 ## Risk Levels
 

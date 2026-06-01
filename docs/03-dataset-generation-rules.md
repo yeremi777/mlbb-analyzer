@@ -50,6 +50,25 @@ mid
 jungle
 ```
 
+## Raw-to-Normalized Review Rules
+
+Generated or fetched source snapshots are not app-ready data. Use this path when future tasks introduce official-source snapshots:
+
+```txt
+public/data/raw/official-heroes/*.json  -> review -> public/data/heroes.json
+```
+
+Rules:
+
+- Keep raw source snapshots under `public/data/raw/`; do not import them from UI or analyzer code.
+- Keep normalized app data under `public/data/`, especially `public/data/heroes.json`.
+- Preserve `sourceRefs` so every normalized record points back to reviewed evidence or an internal manual-curation reference.
+- Normalize only fields whose meaning is understood and allowed by the source audit.
+- Leave `officialId`, `imageUrl`, or `lanes` empty when the raw source is missing, ambiguous, or not manually reviewed.
+- Do not infer lane assignments from role alone.
+- Do not infer matchup scores, counter reasons, or tags from official hero identity data.
+- Review generated output before use, then run the relevant validation command.
+
 ## Tags
 
 Tags describe gameplay behavior and matchup interactions. Use lowercase kebab-case.

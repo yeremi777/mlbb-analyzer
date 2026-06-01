@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import type { Hero } from '@/lib/hero-data'
 
@@ -53,27 +54,43 @@ export function HeroPortrait({
 }: HeroPortraitProps) {
   const initials = hero.name.slice(0, 2).toUpperCase()
   const bgColor = getHeroColor(hero.name)
+  const imageSizes = {
+    sm: '40px',
+    md: '56px',
+    lg: '80px',
+    xl: '112px',
+  }[size]
   
   return (
     <div className={cn('flex flex-col items-center gap-1', className)}>
       <div 
         className={cn(
-          'rounded-full overflow-hidden flex items-center justify-center transition-all',
+          'relative rounded-full overflow-hidden flex items-center justify-center transition-all',
           sizeClasses[size],
           bgColor,
           glow && glowClasses[glowColor],
           glow && glowColor === 'gold' && 'animate-glow'
         )}
       >
-        <span className={cn(
-          'font-bold text-foreground',
-          size === 'sm' && 'text-xs',
-          size === 'md' && 'text-sm',
-          size === 'lg' && 'text-base',
-          size === 'xl' && 'text-xl',
-        )}>
-          {initials}
-        </span>
+        {hero.portrait ? (
+          <Image
+            src={hero.portrait}
+            alt={hero.name}
+            fill
+            sizes={imageSizes}
+            className="object-cover"
+          />
+        ) : (
+          <span className={cn(
+            'font-bold text-foreground',
+            size === 'sm' && 'text-xs',
+            size === 'md' && 'text-sm',
+            size === 'lg' && 'text-base',
+            size === 'xl' && 'text-xl',
+          )}>
+            {initials}
+          </span>
+        )}
       </div>
       {showName && (
         <span className={cn(

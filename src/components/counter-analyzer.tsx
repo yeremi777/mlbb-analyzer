@@ -34,23 +34,30 @@ export function CounterAnalyzer() {
     }, 1000)
   }
 
-  // Reveal sequence: 3 → 2 → 1 → rest
+  // Reveal sequence: 3 → 2 → 1 → (4 & 5 together)
   useEffect(() => {
     if (analysisState !== 'revealing') return
-    
-    const revealSequence = [3, 2, 1, 4, 5]
-    let index = 0
-    
+
+    const revealSequence: number[][] = [[3], [2], [1], [4, 5]]
+    let currentIndex = 0
+
     const interval = setInterval(() => {
-      if (index < revealSequence.length) {
-        setRevealedRanks(prev => [...prev, revealSequence[index]])
-        index++
+      if (currentIndex < revealSequence.length) {
+        const ranksToReveal = revealSequence[currentIndex]
+        setRevealedRanks((prev) => {
+          const newRanks = ranksToReveal.filter((r) => !prev.includes(r))
+          if (newRanks.length > 0) {
+            return [...prev, ...newRanks]
+          }
+          return prev
+        })
+        currentIndex++
       } else {
         clearInterval(interval)
         setAnalysisState('complete')
       }
-    }, 400)
-    
+    }, 800)
+
     return () => clearInterval(interval)
   }, [analysisState])
 
@@ -133,62 +140,64 @@ export function CounterAnalyzer() {
       {(analysisState === 'revealing' || analysisState === 'complete') && counters.length > 0 && (
         <div className="w-full max-w-3xl space-y-8">
           {/* Section Header */}
-          <div className="text-center">
+          <div className="text-center mb-2">
             <h2 className="text-lg font-bold text-foreground mb-1">Counter Recommendations</h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground pb-1">
               Best picks against {selectedHero?.name}
             </p>
           </div>
 
-          {/* Podium Layout: 3 Left, 1 Middle, 2 Right */}
-          <div className="flex items-end justify-center gap-6 sm:gap-10">
-            {/* Rank 3 - Left */}
-            {rank3 && (
-              <div
-                className={cn(
-                  'transition-all duration-500',
-                  revealedRanks.includes(3) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-                )}
-              >
-                <CounterCard
-                  counter={rank3}
-                  isRevealing={revealedRanks.includes(3)}
-                  delay={0}
-                />
-              </div>
-            )}
-            
-            {/* Rank 1 - Middle (elevated) */}
-            {rank1 && (
-              <div
-                className={cn(
-                  'transition-all duration-500 -mt-6',
-                  revealedRanks.includes(1) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-                )}
-              >
-                <CounterCard
-                  counter={rank1}
-                  isRevealing={revealedRanks.includes(1)}
-                  delay={0}
-                />
-              </div>
-            )}
-            
-            {/* Rank 2 - Right */}
-            {rank2 && (
-              <div
-                className={cn(
-                  'transition-all duration-500',
-                  revealedRanks.includes(2) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-                )}
-              >
-                <CounterCard
-                  counter={rank2}
-                  isRevealing={revealedRanks.includes(2)}
-                  delay={0}
-                />
-              </div>
-            )}
+          {/* Podium Layout: 3 Left, 1 Middle (elevated), 2 Right */}
+          <div className="flex justify-center pt-4 sm:pt-6">
+            <div className="flex items-end gap-2 sm:gap-4">
+              {/* Rank 3 - Left */}
+              {rank3 && (
+                <div
+                  className={cn(
+                    'flex flex-col items-center transition-all duration-500',
+                    revealedRanks.includes(3) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+                  )}
+                >
+                  <CounterCard
+                    counter={rank3}
+                    isRevealing={revealedRanks.includes(3)}
+                    delay={0}
+                  />
+                </div>
+              )}
+
+              {/* Rank 1 - Middle (elevated) */}
+              {rank1 && (
+                <div
+                  className={cn(
+                    'flex flex-col items-center transition-all duration-500 -translate-y-6 sm:-translate-y-8',
+                    revealedRanks.includes(1) ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                  )}
+                >
+                  <CounterCard
+                    counter={rank1}
+                    isRevealing={revealedRanks.includes(1)}
+                    delay={0}
+                  />
+                </div>
+              )}
+
+              {/* Rank 2 - Right */}
+              {rank2 && (
+                <div
+                  className={cn(
+                    'flex flex-col items-center transition-all duration-500',
+                    revealedRanks.includes(2) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+                  )}
+                >
+                  <CounterCard
+                    counter={rank2}
+                    isRevealing={revealedRanks.includes(2)}
+                    delay={0}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Remaining Counters - Grid below podium */}
@@ -213,6 +222,15 @@ export function CounterAnalyzer() {
             </div>
           )}
         </div>
+      )}
+
+      {analysisState === 'complete' && selectedHero && counters.length === 0 && (
+        <Card className="w-full max-w-md border-border bg-card p-6 text-center">
+          <h2 className="text-base font-bold text-foreground">No counters available yet</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {selectedHero.name} is in the hero dataset, but no static counter rows have been added for this hero.
+          </p>
+        </Card>
       )}
 
       {/* Hero Selector Modal */}

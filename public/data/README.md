@@ -1,6 +1,6 @@
 # Static Data
 
-Initial data will live here as JSON files.
+Initial public data lives here as JSON files.
 
 Planned files:
 

@@ -58,10 +58,13 @@ The top 3 counters are ranked by analyzer score but revealed in reverse dramatic
 Possible animation timing:
 
 ```txt
-0.3s: #3 appears
-0.9s: #2 appears
-1.5s: #1 appears
+0.0s: #3 appears
+0.8s: #2 appears
+1.6s: #1 appears
+2.4s: #4 and #5 appear together
 ```
+
+Each step uses an 800ms interval between reveals. Ranks 4 and 5 share one step so the lower picks land as a pair.
 
 The first-ranked counter should be the most visually emphasized.
 

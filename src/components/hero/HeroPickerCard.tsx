@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { getCounterRecommendations } from "@/lib/analyzer/counters";
 import type { CounterMatchup } from "@/types/counter";
-import type { Hero } from "@/types/hero";
+import type { Hero, HeroRole } from "@/types/hero";
 
 type HeroPickerCardProps = {
   heroes: Hero[];
@@ -53,16 +54,32 @@ function HeroMark({
     lg: "h-20 w-20 text-base",
     xl: "h-28 w-28 text-2xl",
   }[size];
+  const imageSizes = {
+    sm: "40px",
+    md: "56px",
+    lg: "80px",
+    xl: "112px",
+  }[size];
 
   return (
     <div
-      className={`flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${getHeroTone(
+      className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br ${getHeroTone(
         hero.name,
       )} ${sizeClass} border border-white/15 font-black text-white shadow-inner ${
         glow ? "ring-2 ring-amber-300 shadow-[0_0_36px_rgba(245,158,11,0.3)]" : ""
       }`}
     >
-      {hero.name.slice(0, 2).toUpperCase()}
+      {hero.imageUrl ? (
+        <Image
+          src={hero.imageUrl}
+          alt={hero.name}
+          fill
+          sizes={imageSizes}
+          className="object-cover"
+        />
+      ) : (
+        hero.name.slice(0, 2).toUpperCase()
+      )}
     </div>
   );
 }
@@ -70,7 +87,7 @@ function HeroMark({
 export function HeroPickerCard({ heroes, counters }: HeroPickerCardProps) {
   const [selectedHeroId, setSelectedHeroId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [selectedRole, setSelectedRole] = useState("all");
+  const [selectedRole, setSelectedRole] = useState<HeroRole | "all">("all");
   const [revealState, setRevealState] = useState<RevealState>("idle");
   const [revealedRanks, setRevealedRanks] = useState<number[]>([]);
 
@@ -268,17 +285,6 @@ export function HeroPickerCard({ heroes, counters }: HeroPickerCardProps) {
                     className="rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-100"
                   >
                     {formatLabel(label)}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mt-3 flex flex-wrap justify-center gap-2">
-                {selectedHero.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full bg-white/5 px-3 py-1 text-xs text-zinc-300"
-                  >
-                    {formatLabel(tag)}
                   </span>
                 ))}
               </div>
