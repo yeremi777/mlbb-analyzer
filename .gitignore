@@ -43,3 +43,5 @@ TASKS.md
 .agent
 .claude
 .pi
+
+public/data/counters/*.json

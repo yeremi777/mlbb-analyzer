@@ -24,7 +24,8 @@ Do not copy proprietary tier lists, rankings, or matchup scores directly from th
 Start with the existing planned schema:
 
 - `heroes.json` for hero identity, role, lane, and source references.
-- `counters.json` for matchup score, reasons, and counter types.
+- `counters.json` as the counter dataset index.
+- `counters/<target-hero-id>.json` for matchup reasons, counter types, and proof entries per target hero.
 - `rules.json` later, after the static matchup flow works.
 
 ## Planned Raw-to-Normalized Official Data Flow
@@ -40,6 +41,8 @@ public/data/raw/
 public/data/
   heroes.json
   counters.json
+  counters/
+    <target-hero-id>.json
 ```
 
 - Raw official snapshots should live under `public/data/raw/` when this flow is implemented.
@@ -81,7 +84,7 @@ For each external source considered, record:
 
 ## Later AI Assistant Use
 
-AI can later help summarize source evidence, draft matchup notes, and suggest first-pass scores. Keep it separate from the first foundation step.
+AI can later summarize source evidence and produce matchup scores from reviewed context. Keep AI scoring separate from static dataset authoring.
 
 ## Future Player Analysis Data
 

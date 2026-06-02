@@ -35,7 +35,7 @@ Suggested content:
 
 ## Top 3 Reveal
 
-The top 3 counters are ranked by analyzer score but revealed in reverse dramatic order.
+The top 3 counters are ranked by analyzer output but revealed in reverse dramatic order. Until AI scoring exists, the analyzer uses reviewed evidence richness as the temporary deterministic ordering.
 
 ```txt
 #3:

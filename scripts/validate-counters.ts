@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { basename, resolve } from "node:path";
 
 type HeroRecord = {
   uid?: unknown;
@@ -8,9 +8,29 @@ type HeroRecord = {
 type CounterRecord = {
   targetHeroId?: unknown;
   counterHeroId?: unknown;
-  score?: unknown;
   reasons?: unknown;
+  proof?: unknown;
 };
+
+const PROOF_CATEGORIES = new Set([
+  "skill-interaction",
+  "crowd-control-counter",
+  "damage-type-advantage",
+  "item-power-spike",
+  "mobility-advantage",
+  "range-advantage",
+  "kiting",
+  "sustain-anti-sustain",
+  "positioning-requirement",
+  "cooldown-window",
+  "vision-awareness",
+  "teamfight-role-counter",
+  "game-phase",
+  "execution-difficulty",
+]);
+
+const PROOF_PRIORITIES = new Set(["primary", "secondary", "condition"]);
+const PROOF_IMPACTS = new Set(["low", "medium", "high"]);
 
 export type ValidateCountersInput = {
   heroes: unknown;
@@ -28,6 +48,53 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function describePair(counter: CounterRecord, index: number): string {
   return `counter entry #${index + 1} (${String(counter.targetHeroId)} -> ${String(counter.counterHeroId)})`;
+}
+
+function hasOnlyNonEmptyStrings(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string" && item.trim() !== "");
+}
+
+function validateProofEntry(value: unknown, label: string, proofIndex: number): string[] {
+  const errors: string[] = [];
+  const proofLabel = `${label} proof entry #${proofIndex + 1}`;
+
+  if (!isRecord(value)) {
+    return [`${proofLabel} must be an object`];
+  }
+
+  if (typeof value.id !== "string" || value.id.trim() === "") {
+    errors.push(`${proofLabel} must have a non-empty string id`);
+  }
+
+  if (typeof value.category !== "string" || !PROOF_CATEGORIES.has(value.category)) {
+    errors.push(`${proofLabel} category must be one of ${Array.from(PROOF_CATEGORIES).join(", ")}`);
+  }
+
+  if (typeof value.priority !== "string" || !PROOF_PRIORITIES.has(value.priority)) {
+    errors.push(`${proofLabel} priority must be one of primary, secondary, condition`);
+  }
+
+  if (typeof value.impact !== "string" || !PROOF_IMPACTS.has(value.impact)) {
+    errors.push(`${proofLabel} impact must be one of low, medium, high`);
+  }
+
+  if (typeof value.summary !== "string" || value.summary.trim() === "") {
+    errors.push(`${proofLabel} must have a non-empty string summary`);
+  }
+
+  if (value.worksBestWhen !== undefined && !hasOnlyNonEmptyStrings(value.worksBestWhen)) {
+    errors.push(`${proofLabel} worksBestWhen must contain only non-empty strings when present`);
+  }
+
+  if (value.failureCases !== undefined && !hasOnlyNonEmptyStrings(value.failureCases)) {
+    errors.push(`${proofLabel} failureCases must contain only non-empty strings when present`);
+  }
+
+  if ("scoreHint" in value) {
+    errors.push(`${proofLabel} must not include scoreHint; scoring is produced by the analyzer`);
+  }
+
+  return errors;
 }
 
 export function validateCountersData(input: ValidateCountersInput): ValidationResult {
@@ -91,16 +158,34 @@ export function validateCountersData(input: ValidateCountersInput): ValidationRe
       }
     }
 
-    if (typeof counter.score !== "number" || Number.isNaN(counter.score)) {
-      errors.push(`${label} score must be numeric`);
-    } else if (counter.score < 0 || counter.score > 100) {
-      errors.push(`${label} score must be within 0-100 inclusive`);
+    if ("score" in counter) {
+      errors.push(`${label} must not include score; scoring is produced by the analyzer`);
     }
 
     if (!Array.isArray(counter.reasons) || counter.reasons.length === 0) {
       errors.push(`${label} reasons must be present and non-empty`);
     } else if (counter.reasons.some((reason) => typeof reason !== "string" || reason.trim() === "")) {
       errors.push(`${label} reasons must contain only non-empty strings`);
+    }
+
+    if (counter.proof !== undefined) {
+      if (!Array.isArray(counter.proof) || counter.proof.length === 0) {
+        errors.push(`${label} proof must be a non-empty array when present`);
+      } else {
+        const seenProofIds = new Set<string>();
+
+        counter.proof.forEach((proof: unknown, proofIndex: number) => {
+          errors.push(...validateProofEntry(proof, label, proofIndex));
+
+          if (isRecord(proof) && typeof proof.id === "string" && proof.id.trim() !== "") {
+            if (seenProofIds.has(proof.id)) {
+              errors.push(`${label} proof entry #${proofIndex + 1} has duplicate id "${proof.id}"`);
+            } else {
+              seenProofIds.add(proof.id);
+            }
+          }
+        });
+      }
     }
   });
 
@@ -111,14 +196,65 @@ function readJsonFile(path: string): unknown {
   return JSON.parse(readFileSync(path, "utf8"));
 }
 
+type CounterDatasetReadResult = {
+  counters: unknown;
+  errors: string[];
+};
+
+function readCountersDataset(projectRoot: string): CounterDatasetReadResult {
+  const countersPath = resolve(projectRoot, "public/data/counters.json");
+  const countersIndex = readJsonFile(countersPath);
+
+  if (Array.isArray(countersIndex)) {
+    return { counters: countersIndex, errors: [] };
+  }
+
+  if (!isRecord(countersIndex) || !Array.isArray(countersIndex.files)) {
+    return { counters: countersIndex, errors: ["counter dataset index must be an array or an object with a files array"] };
+  }
+
+  const errors: string[] = [];
+  const counters = countersIndex.files.flatMap((file) => {
+    if (typeof file !== "string" || file.trim() === "") {
+      errors.push("counter dataset index files must contain only non-empty strings");
+      return [];
+    }
+
+    const filePath = resolve(projectRoot, "public/data", file);
+    const fileCounters = readJsonFile(filePath);
+    const expectedTargetHeroId = basename(file, ".json");
+
+    if (!Array.isArray(fileCounters)) {
+      errors.push(`counter dataset file ${file} must contain an array`);
+      return [];
+    }
+
+    fileCounters.forEach((counter, index) => {
+      if (isRecord(counter) && counter.targetHeroId !== expectedTargetHeroId) {
+        errors.push(
+          `counter dataset file ${file} entry #${index + 1} targetHeroId must match "${expectedTargetHeroId}"`,
+        );
+      }
+    });
+
+    return fileCounters;
+  });
+
+  return { counters, errors };
+}
+
 export function validateProjectCounters(projectRoot = process.cwd()): ValidationResult {
   const heroesPath = resolve(projectRoot, "public/data/heroes.json");
-  const countersPath = resolve(projectRoot, "public/data/counters.json");
-
-  return validateCountersData({
+  const counterDataset = readCountersDataset(projectRoot);
+  const result = validateCountersData({
     heroes: readJsonFile(heroesPath),
-    counters: readJsonFile(countersPath),
+    counters: counterDataset.counters,
   });
+
+  return {
+    valid: result.valid && counterDataset.errors.length === 0,
+    errors: [...counterDataset.errors, ...result.errors],
+  };
 }
 
 function runCli(): void {

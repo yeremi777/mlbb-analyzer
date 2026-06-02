@@ -21,7 +21,6 @@ const rankConfig = {
     glowColor: 'gold' as const,
     borderClass: 'ring-4 ring-primary/60 ring-offset-4 ring-offset-background',
     textClass: 'text-primary',
-    scoreClass: 'text-primary font-bold',
   },
   2: {
     icon: Medal,
@@ -31,7 +30,6 @@ const rankConfig = {
     glowColor: 'silver' as const,
     borderClass: 'ring-2 ring-silver/50 ring-offset-2 ring-offset-background',
     textClass: 'text-silver',
-    scoreClass: 'text-silver font-semibold',
   },
   3: {
     icon: Award,
@@ -41,7 +39,6 @@ const rankConfig = {
     glowColor: 'bronze' as const,
     borderClass: 'ring-2 ring-bronze/50 ring-offset-2 ring-offset-background',
     textClass: 'text-bronze',
-    scoreClass: 'text-bronze font-semibold',
   },
 }
 
@@ -92,11 +89,6 @@ export function CounterCard({ counter, isRevealing = false, delay = 0 }: Counter
         {/* Role */}
         <p className="text-xs text-muted-foreground">{counter.role}</p>
 
-        {/* Score */}
-        <div className={cn('mt-1', config.scoreClass)}>
-          <span className="text-sm">{counter.counterScore}%</span>
-        </div>
-
         {/* Tags - fixed height container */}
         <div className="flex flex-wrap justify-center gap-1 mt-2 min-h-[24px]">
           {counter.tags.slice(0, 2).map(tag => (
@@ -140,10 +132,6 @@ export function CounterCard({ counter, isRevealing = false, delay = 0 }: Counter
       {/* Role */}
       <p className="text-[10px] text-muted-foreground">{counter.role}</p>
       
-      {/* Score */}
-      <span className="text-xs font-medium text-muted-foreground mt-1">
-        {counter.counterScore}%
-      </span>
     </div>
   )
 }

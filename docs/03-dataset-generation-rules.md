@@ -102,17 +102,11 @@ backline
 
 Avoid vague tags that cannot be used by analyzer rules.
 
-## Counter Scores
+## Counter Scoring
 
-Counter scores use a 0-100 range:
+Static counter records must not include numeric scores. Scores are produced later by the AI analyzer from reviewed context such as reasons, counter types, proof categories, proof priority, proof impact, works-best conditions, and failure cases.
 
-- 90-100: Excellent counter.
-- 75-89: Strong counter.
-- 60-74: Situational or moderate counter.
-- 40-59: Neutral or weak counter.
-- 0-39: Poor counter or not recommended.
-
-Scores should reflect matchup usefulness, not general hero strength.
+More and better-reviewed context can support a stronger AI-produced score, but the dataset should store the evidence rather than the result.
 
 ## Human-Readable Reasons
 
@@ -133,7 +127,7 @@ Review checklist:
 - Hero IDs are valid.
 - Roles and lanes are realistic.
 - Tags match the hero's actual gameplay.
-- Scores are reasonable.
+- Counter records do not include static scores.
 - Reasons are specific and readable.
 - Data does not copy proprietary rankings from another website.
 

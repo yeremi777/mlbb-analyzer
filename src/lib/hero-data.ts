@@ -16,7 +16,6 @@ export interface Hero {
 
 export interface CounterHero extends Hero {
   rank: number;
-  counterScore: number;
   reason: string;
   tags: string[];
 }
@@ -63,7 +62,6 @@ export function getCountersForHero(heroId: string): CounterHero[] {
     return {
       ...counterHero,
       rank: recommendation.rank,
-      counterScore: recommendation.score,
       reason: recommendation.reasons[0] ?? "",
       tags: recommendation.counterTypes,
     };

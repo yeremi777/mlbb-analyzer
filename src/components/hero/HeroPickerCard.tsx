@@ -326,7 +326,7 @@ export function HeroPickerCard({ heroes, counters }: HeroPickerCardProps) {
           <div className="rounded-xl border border-white/10 bg-zinc-900/70 p-8 text-center">
             <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-amber-300 border-t-transparent" />
             <p className="mt-4 text-sm font-medium text-zinc-300">
-              Reading matchup scores from the static dataset...
+              Reading matchup context from the reviewed dataset...
             </p>
           </div>
         ) : null}
@@ -339,7 +339,7 @@ export function HeroPickerCard({ heroes, counters }: HeroPickerCardProps) {
                 Counter Recommendations
               </h2>
               <p className="mt-1 text-sm text-zinc-400">
-                Best deterministic picks against {selectedHero.name}
+                Evidence-ordered picks against {selectedHero.name}
               </p>
             </div>
 
@@ -411,21 +411,21 @@ function CounterResultCard({
       label: "#1 Best Counter",
       border: "border-amber-300/60",
       background: "bg-gradient-to-br from-zinc-900 via-zinc-900 to-amber-300/10",
-      score: "text-amber-300",
+      accent: "text-amber-300",
       size: "xl" as const,
     },
     2: {
       label: "#2",
       border: "border-zinc-300/30",
       background: "bg-zinc-900/80",
-      score: "text-zinc-200",
+      accent: "text-zinc-200",
       size: "lg" as const,
     },
     3: {
       label: "#3",
       border: "border-orange-300/30",
       background: "bg-zinc-900/80",
-      score: "text-orange-300",
+      accent: "text-orange-300",
       size: "lg" as const,
     },
   }[recommendation.rank as 1 | 2 | 3];
@@ -461,7 +461,7 @@ function CounterResultCard({
 
         <div className="min-w-0 flex-1">
           <p
-            className={`font-mono text-xs font-black uppercase tracking-[0.2em] ${rankStyles.score}`}
+            className={`font-mono text-xs font-black uppercase tracking-[0.2em] ${rankStyles.accent}`}
           >
             {rankStyles.label}
           </p>
@@ -474,9 +474,6 @@ function CounterResultCard({
           </h3>
           <p className="mt-1 text-sm text-zinc-400">
             {recommendation.counterHero.roles.map(formatLabel).join(" / ")}
-          </p>
-          <p className={`mt-2 text-sm font-black ${rankStyles.score}`}>
-            {recommendation.score}% effective
           </p>
           <p className="mt-3 text-sm leading-6 text-zinc-300">
             {recommendation.reasons[0]}
@@ -522,9 +519,6 @@ function CompactCounterRow({
             {recommendation.counterTypes.map(formatLabel).join(" / ")}
           </p>
         </div>
-        <p className="font-mono text-sm font-black text-zinc-300">
-          {recommendation.score}
-        </p>
       </div>
       <p className="mt-3 line-clamp-2 text-xs leading-5 text-zinc-400">
         {recommendation.reasons[0]}

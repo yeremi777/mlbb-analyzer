@@ -7,8 +7,11 @@ The MVP should begin with static JSON files and TypeScript types. These schemas 
 ```txt
 public/data/heroes.json
 public/data/counters.json
+public/data/counters/<target-hero-id>.json
 public/data/rules.json
 ```
+
+`public/data/counters.json` is an index file. Each referenced file under `public/data/counters/` stores the counter matchup array for one target hero.
 
 ## TypeScript Types
 
@@ -43,10 +46,34 @@ export type Hero = {
 export type CounterMatchup = {
   targetHeroId: string;
   counterHeroId: string;
-  score: number;
   reasons: string[];
   counterTypes: string[];
+  proof?: CounterProof[];
   patchVersion?: string;
+};
+
+export type CounterProof = {
+  id: string;
+  category:
+    | "skill-interaction"
+    | "crowd-control-counter"
+    | "damage-type-advantage"
+    | "item-power-spike"
+    | "mobility-advantage"
+    | "range-advantage"
+    | "kiting"
+    | "sustain-anti-sustain"
+    | "positioning-requirement"
+    | "cooldown-window"
+    | "vision-awareness"
+    | "teamfight-role-counter"
+    | "game-phase"
+    | "execution-difficulty";
+  priority: "primary" | "secondary" | "condition";
+  impact: "low" | "medium" | "high";
+  summary: string;
+  worksBestWhen?: string[];
+  failureCases?: string[];
 };
 
 export type CounterRule = {
@@ -108,15 +135,67 @@ export type CounterRule = {
 {
   "targetHeroId": "tigreal",
   "counterHeroId": "diggie",
-  "score": 92,
   "reasons": [
     "Diggie can reduce the impact of Tigreal's crowd control setup.",
     "Diggie's teamfight protection helps allies survive Tigreal's engage."
   ],
   "counterTypes": ["anti-cc", "disengage", "teamfight"],
+  "proof": [
+    {
+      "id": "diggie-time-journey-vs-tigreal-engage",
+      "category": "skill-interaction",
+      "priority": "primary",
+      "impact": "high",
+      "summary": "Tigreal's main threat is an AoE crowd-control engage, while Diggie's ultimate gives nearby allies cleanse and control immunity during the engage window.",
+      "worksBestWhen": [
+        "Diggie saves ultimate for Tigreal's real engage.",
+        "Diggie stays close enough to protect the teammates Tigreal wants to catch."
+      ],
+      "failureCases": [
+        "Tigreal baits Diggie's ultimate before committing.",
+        "Tigreal catches Diggie out of position.",
+        "Tigreal engages while Diggie's ultimate is on cooldown."
+      ]
+    }
+  ],
   "patchVersion": "manual-v1"
 }
 ```
+
+## Counter Index Example
+
+```json
+{
+  "files": [
+    "counters/miya.json",
+    "counters/tigreal.json"
+  ]
+}
+```
+
+Each file listed in the index must contain an array of `CounterMatchup` records where `targetHeroId` matches the file name. For example, `public/data/counters/miya.json` should contain Miya counter records.
+
+## Counter Proof Fields
+
+Counter proof entries are optional reviewed evidence records that explain why a matchup works. They are meant to answer:
+
+```txt
+What does the target hero want to do, what does the counter hero do to stop or punish it, and under what condition does it work?
+```
+
+- `id`: unique proof ID within the matchup, using readable kebab-case.
+- `category`: the evidence category. Use `skill-interaction` for direct skill answers, `crowd-control-counter` for cleanse or immunity, `damage-type-advantage` for true damage or burst, `item-power-spike` for item-dependent matchups, and the other allowed values for conditions or matchup context.
+- `priority`: `primary` for hero design and skill proof, `secondary` for supporting factors such as item timing, and `condition` for requirements such as positioning, cooldown, vision, game phase, or execution.
+- `impact`: reviewer estimate of the proof's matchup importance: `low`, `medium`, or `high`.
+- `summary`: concrete interaction summary. It should state the target hero's threat and the counter hero's answer.
+- `worksBestWhen`: optional conditions that make the proof reliable.
+- `failureCases`: optional cases where the counter can fail. Add these whenever timing, cooldown, positioning, or item dependency matters.
+
+Proof priority rules:
+
+- Hero design and skill interaction is the strongest proof. Example: Diggie's ultimate directly answers Tigreal's AoE crowd-control engage.
+- Item power spikes are secondary proof. Example: Karrie's attack-speed and on-hit item timing improves her ability to melt Tigreal, but she still needs safe positioning.
+- AI scoring and explanations must use supplied proof, reasons, and counter types only. AI must not invent interactions, item requirements, or failure cases.
 
 ## Counter Rule Example
 
@@ -150,6 +229,31 @@ The hero validator checks that:
 
 The script prints all validation errors and exits non-zero when the dataset is invalid.
 
+## Counter Dataset Validation
+
+Run counter validation with:
+
+```bash
+npm run validate:counters
+```
+
+The counter validator reads `public/data/counters.json`. If the file contains a `files` index, it loads and validates every referenced split counter file.
+
+The counter validator checks that:
+
+- the hero dataset and resolved counter records are JSON arrays;
+- every `targetHeroId` and `counterHeroId` references an existing hero `uid`;
+- target and counter IDs are different;
+- duplicate target/counter pairs are rejected;
+- `score` is not present in static counter records;
+- `reasons` is a non-empty array of non-empty strings;
+- `proof`, when present, is a non-empty array;
+- proof entries have non-empty `id` and `summary` fields;
+- proof `category`, `priority`, and `impact` use the allowed values;
+- proof `worksBestWhen` and `failureCases`, when present, contain only non-empty strings;
+- proof `scoreHint` is not present in static proof records;
+- duplicate proof IDs inside the same matchup are rejected.
+
 ## Naming Rules
 
 - Hero `uid` values use lowercase UID format and may include dots for official-style names such as `x.borg`.
@@ -159,8 +263,11 @@ The script prints all validation errors and exits non-zero when the dataset is i
 - `roles` should list the primary role first.
 - `lanes` should use project lane IDs such as `exp`, `gold`, `mid`, `roam`, and `jungle`.
 - `sourceRefs` is optional while references are being filled manually, but should list reviewed source references when known.
-- Scores use a 0-100 range.
 - Every matchup needs at least one human-readable reason.
 - Reasons should explain the interaction, not only state that one hero is good.
 - `counterTypes` should reference meaningful interaction categories such as `anti-cc`, `anti-dash`, `burst`, or `protect`.
+- `proof.id` should use readable kebab-case and be unique within its matchup.
+- `proof.summary` should explain why the counter works, not only restate that the matchup is favorable.
+- `proof.priority` should keep direct hero design and skill interactions as `primary`, item timing as `secondary`, and positioning, cooldown, vision, game phase, or execution requirements as `condition`.
+- Static counter records must not include `score` or `proof.scoreHint`; the future AI analyzer produces scores from reviewed context.
 - `patchVersion` is optional during early manual curation, but should be added when patch-specific data becomes important.

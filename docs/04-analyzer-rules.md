@@ -1,6 +1,6 @@
 # Analyzer Rules
 
-The analyzer is responsible for producing structured rankings. In the first MVP, rankings come from static matchup scores. Later phases may add an AI analysis assistant, but the immediate focus is setup and data gathering.
+The analyzer is responsible for producing structured rankings. Static counter data stores reviewed context, not numeric scores. Later AI scoring should produce numeric matchup scores from reasons, counter types, and proof entries.
 
 ## One Enemy Hero Analysis
 
@@ -8,7 +8,7 @@ For the MVP:
 
 1. Receive one selected enemy hero ID.
 2. Find all `CounterMatchup` records where `targetHeroId` matches the selected enemy hero.
-3. Sort matching records by `score` from highest to lowest.
+3. Sort matching records by reviewed evidence richness until AI scoring is implemented.
 4. Select the top 3 counters for dramatic reveal.
 5. Return remaining counters as a normal ranked list.
 
@@ -16,9 +16,11 @@ If no matchups exist, return a no-result state rather than inventing recommendat
 
 ## Sorting Rules
 
-Primary sort:
+Current temporary sort:
 
-- Higher `score` appears first.
+- Higher reviewed evidence weight appears first.
+- Primary proof entries count more than secondary proof entries.
+- High-impact proof entries count more than medium or low-impact proof entries.
 
 Tie-breakers should be deterministic:
 
@@ -49,18 +51,18 @@ Deterministic behavior makes the app:
 - Safer to cache.
 - Easier to debug when users question recommendations.
 
-## Future Scoring Formula
+## Future AI Scoring
 
-Long-term scoring may use this concept:
+Long-term scoring should use the reviewed context as input:
 
 ```txt
-Final score =
-Base matchup score
-+ Skill interaction bonus
-+ Role/lane relevance bonus
-+ Team composition bonus later
-+ Meta/patch bonus later
-- Difficulty penalty later
+AI score input =
+Reasons
++ Counter types
++ Proof categories
++ Proof priorities and impacts
++ Works-best conditions
++ Failure cases
 ```
 
-For MVP, static score from `counters.json` is enough. Do not add advanced scoring until the base dataset and reveal flow are working.
+Static counter records must not include a `score` field. The AI analyzer may later produce a runtime score, but it must base that score on supplied reviewed context rather than invented matchup facts.
