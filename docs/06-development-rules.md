@@ -8,8 +8,8 @@ These rules guide implementation after the documentation phase.
 - Use Next.js when project setup begins.
 - Use Tailwind CSS for styling.
 - Use shadcn/ui for reusable UI primitives when appropriate.
-- Use static JSON data first.
-- Use local analyzer logic first.
+- Load heroes and counter matchups from the analyzer API (`src/lib/analyzer-api.ts`).
+- Keep API URL configuration in environment variables, not in source code.
 
 ## Keep Code Simple
 
@@ -17,25 +17,21 @@ Prefer explicit code over premature abstraction. Add helper functions only when 
 
 Keep these areas separate:
 
-- Static data.
-- Type definitions.
-- Analyzer logic.
+- API client (`analyzer-api.ts`).
+- Type definitions (`src/types/`).
 - UI components.
 - UI state and animation timing.
 
-## MVP Restrictions
+## MVP Restrictions (this frontend repo)
 
 For the MVP:
 
-- No backend.
-- No database.
-- No authentication.
-- No live AI scoring in the first static MVP.
-- No scraper.
-- No crawler.
-- No live patch/meta fetch.
+- No embedded database or auth in the Next.js app.
+- No static JSON datasets checked into this repo for runtime use.
+- No scraper or crawler in the frontend.
+- No live patch/meta fetch from the browser.
 
-The app should work from local static data.
+Counter ranking and matchup records are owned by the analyzer API. The UI fetches ranked results from API routes such as `GET /api/heroes` and `GET /api/heroes/:id/counters`.
 
 ## Component Naming
 
@@ -67,13 +63,12 @@ Future validation should verify:
 
 Data validation should run before relying on generated or manually edited datasets.
 
-## Analyzer Expectations
+## API Client Expectations
 
-- Analyzer functions should be deterministic.
-- Analyzer functions should avoid UI dependencies.
-- Analyzer functions should not call APIs.
-- MVP analyzer functions should not call live AI services directly.
-- Analyzer functions should return enough structured data for the UI to display ranking and reasons.
+- API helpers should be thin wrappers around `fetch`.
+- UI components should not hardcode API base URLs; use `NEXT_PUBLIC_ANALYZER_API_URL`.
+- Handle loading and error states when the API is unavailable.
+- Treat API response shapes as defined in `docs/02-dataset-schema.md` and `src/types/`.
 
 ## Commit Message Style
 

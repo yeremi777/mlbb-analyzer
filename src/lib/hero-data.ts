@@ -1,7 +1,4 @@
-import { getCounterRecommendations } from "@/lib/analyzer/counters";
-import { counters } from "@/data/counters";
-import { heroes } from "@/data/heroes";
-import type { Hero as DatasetHero, HeroRole as DatasetHeroRole } from "@/types/hero";
+import type { Hero as DatasetHero } from "@/types/hero";
 
 export type HeroRole = "Tank" | "Fighter" | "Assassin" | "Mage" | "Marksman" | "Support";
 
@@ -28,42 +25,3 @@ export const HERO_ROLES: HeroRole[] = [
   "Marksman",
   "Support",
 ];
-
-const roleLabelById: Record<DatasetHeroRole, HeroRole> = {
-  tank: "Tank",
-  fighter: "Fighter",
-  assassin: "Assassin",
-  mage: "Mage",
-  marksman: "Marksman",
-  support: "Support",
-};
-
-function toUiHero(hero: DatasetHero): Hero {
-  return {
-    id: hero.uid,
-    name: hero.name,
-    role: roleLabelById[hero.roles[0]] ?? "Fighter",
-    portrait: hero.images.head,
-    roles: hero.roles,
-    lanes: hero.lanes,
-  };
-}
-
-export const HEROES: Hero[] = heroes.map(toUiHero);
-
-export function getCountersForHero(heroId: string): CounterHero[] {
-  return getCounterRecommendations({
-    targetHeroId: heroId,
-    heroes,
-    counters,
-  }).map((recommendation) => {
-    const counterHero = toUiHero(recommendation.counterHero);
-
-    return {
-      ...counterHero,
-      rank: recommendation.rank,
-      reason: recommendation.reasons[0] ?? "",
-      tags: recommendation.counterTypes,
-    };
-  });
-}

@@ -52,16 +52,16 @@ jungle
 
 ## Raw-to-Normalized Review Rules
 
-Generated or fetched source snapshots are not app-ready data. Use this path when future tasks introduce official-source snapshots:
+Generated or fetched source snapshots are not app-ready data. On the **analyzer API** side, use a path such as:
 
 ```txt
-public/data/raw/official-heroes/*.json  -> review -> public/data/heroes.json
+raw/official-heroes/*.json  -> review -> heroes.json (or DB records)
 ```
 
 Rules:
 
-- Keep raw source snapshots under `public/data/raw/`; do not import them from UI or analyzer code.
-- Keep normalized app data under `public/data/`, especially `public/data/heroes.json`.
+- Keep raw source snapshots separate from normalized API data; the Next.js frontend must not import raw snapshots.
+- Keep normalized hero and counter records in the analyzer API store (files or database), not in this frontend repo.
 - Preserve `sourceRefs` so every normalized record points back to reviewed evidence or an internal manual-curation reference.
 - Normalize only fields whose meaning is understood and allowed by the source audit.
 - Leave `mlid`, `images.head`, `images.smallmap`, or `lanes` empty when the raw source is missing, ambiguous, or not manually reviewed.
@@ -133,10 +133,10 @@ Review checklist:
 
 ## Dataset Consistency Validation
 
-Future validation scripts should check:
+Future validation on the API dataset should check:
 
-- Every `targetHeroId` exists in `heroes.json`.
-- Every `counterHeroId` exists in `heroes.json`.
+- Every `targetHeroId` exists in the hero catalog.
+- Every `counterHeroId` exists in the hero catalog.
 - Scores are numbers from 0 to 100.
 - Reasons are non-empty arrays.
 - Tags use lowercase kebab-case.

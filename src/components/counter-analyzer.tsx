@@ -291,7 +291,7 @@ export function CounterAnalyzer() {
         <Card className="w-full max-w-md border-border bg-card p-6 text-center">
           <h2 className="text-base font-bold text-foreground">No counters available yet</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            {selectedHero.name} is in the hero dataset, but no static counter rows have been added for this hero.
+            The analyzer API returned no counter matchups for {selectedHero.name} yet.
           </p>
         </Card>
       )}

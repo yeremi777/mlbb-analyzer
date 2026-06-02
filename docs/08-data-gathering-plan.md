@@ -1,6 +1,6 @@
 # Data Gathering Plan
 
-This project should start with a small, reviewable dataset before building a larger data pipeline.
+This project should start with a small, reviewable dataset before building a larger data pipeline. **Dataset storage and ingestion live in the analyzer API**, not in the Next.js frontend.
 
 ## Immediate Goal
 
@@ -10,6 +10,8 @@ Prepare enough data to support the first counter reveal MVP:
 - A small set of counter matchups.
 - Clear reasons for each counter.
 - Source notes for hero facts and matchup evidence.
+
+The frontend consumes this through the analyzer API after it is reviewed and published.
 
 ## Suggested Starter Sources
 
@@ -21,53 +23,48 @@ Do not copy proprietary tier lists, rankings, or matchup scores directly from th
 
 ## First Dataset Fields
 
-Start with the existing planned schema:
+Start with the schema in `docs/02-dataset-schema.md`:
 
-- `heroes.json` for hero identity, role, lane, and source references.
-- `counters.json` as the counter dataset index.
-- `counters/<target-hero-id>.json` for matchup reasons, counter types, and proof entries per target hero.
-- `rules.json` later, after the static matchup flow works.
+- Hero records (`uid`, `mlid`, `name`, `images`, `roles`, `lanes`, `sourceRefs`).
+- Counter matchups per target hero (`targetHeroId`, `counterHeroId`, `reasons`, `counterTypes`, optional `proof`).
+- `rules.json` later, after the matchup flow works.
 
-## Planned Raw-to-Normalized Official Data Flow
+## Planned Raw-to-Normalized Official Data Flow (analyzer API)
 
-Future official-source ingestion must keep raw source captures separate from reviewed app data.
+Future official-source ingestion must keep raw source captures separate from reviewed API data.
 
-### Planned locations
+### Planned locations (API service)
 
 ```txt
-public/data/raw/
+raw/
   official-heroes/
     YYYY-MM-DD-mobilelegends-heroes.json
-public/data/
-  heroes.json
-  counters.json
-  counters/
-    <target-hero-id>.json
+heroes.json                    # or equivalent DB table
+counters.json                  # optional index
+counters/
+  <target-hero-id>.json
 ```
 
-- Raw official snapshots should live under `public/data/raw/` when this flow is implemented.
-- Normalized, app-consumable data remains under `public/data/`.
-- Raw snapshots are source captures for audit and review; analyzer and UI code must not import raw snapshots directly.
-- Normalized files are curated outputs shaped for the app schema, such as reviewed hero identity, role, lane, image URL, and source references.
+- Raw official snapshots are for audit and review only.
+- Normalized records are curated outputs shaped for the API schema.
+- The Next.js app calls HTTP endpoints; it does not read these paths from disk.
 
 ### Flow
 
 1. **Source approval**: confirm the source is documented in `docs/01-data-source-research.md` and explicitly approved for the intended access pattern.
-2. **Raw capture**: a manual-only fetch script writes timestamped snapshots into `public/data/raw/official-heroes/` for explicit approved URLs only.
+2. **Raw capture**: a manual-only fetch job writes timestamped snapshots under `raw/official-heroes/` for explicit approved URLs only.
 3. **Raw review**: inspect the snapshot for source permissions, attribution needs, field meaning, missing fields, ambiguity, and data quality.
-4. **Normalization**: convert only approved and understood fields into `public/data/heroes.json` using the documented schema.
-5. **Human review**: review normalized output before app/analyzer use. Empty or ambiguous fields should stay empty instead of being guessed.
-6. **Validation**: run `npm run validate:heroes`, then relevant tests/lint/build before marking data usable.
+4. **Normalization**: convert only approved and understood fields into the API’s hero catalog using the documented schema.
+5. **Human review**: review normalized output before exposing it via the API. Empty or ambiguous fields should stay empty instead of being guessed.
+6. **Validation**: run dataset validation on the API side before marking data usable.
 
 ### Explicit boundaries
 
-- Raw snapshots are evidence, not app data.
-- `public/data/heroes.json` is the reviewed app source of truth.
+- Raw snapshots are evidence, not API responses.
+- The reviewed hero catalog on the API is the source of truth for `GET /api/heroes`.
 - Generated normalized data is not trusted until it passes human review and validation.
-- Automated scheduled crawling, ID enumeration, and direct raw-to-app writes are out of scope until explicitly approved by a future task.
-- The manual fetch script must only fetch explicit approved URLs supplied by the operator and must write raw snapshots for review.
-
-This section documents the intended design and boundaries for manual raw snapshot ingestion.
+- Automated scheduled crawling, ID enumeration, and direct raw-to-production writes are out of scope until explicitly approved by a future task.
+- Manual fetch jobs must only request explicit approved URLs supplied by the operator.
 
 ## Source Audit Notes
 
@@ -84,7 +81,7 @@ For each external source considered, record:
 
 ## Later AI Assistant Use
 
-AI can later summarize source evidence and produce matchup scores from reviewed context. Keep AI scoring separate from static dataset authoring.
+AI can later summarize source evidence and produce matchup scores from reviewed context. Keep AI scoring separate from static dataset authoring on the API.
 
 ## Future Player Analysis Data
 

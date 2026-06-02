@@ -1,34 +1,28 @@
 # Analyzer Rules
 
-The analyzer is responsible for producing structured rankings. Static counter data stores reviewed context, not numeric scores. Later AI scoring should produce numeric matchup scores from reasons, counter types, and proof entries.
+Counter ranking is produced by the **analyzer API**. The API stores reviewed matchup context (reasons, counter types, proof) and returns an ordered list to the frontend. Later AI scoring may produce numeric matchup scores from that context.
 
 ## One Enemy Hero Analysis
 
 For the MVP:
 
-1. Receive one selected enemy hero ID.
-2. Find all `CounterMatchup` records where `targetHeroId` matches the selected enemy hero.
-3. Sort matching records by reviewed evidence richness until AI scoring is implemented.
-4. Select the top 3 counters for dramatic reveal.
-5. Return remaining counters as a normal ranked list.
+1. The user selects one enemy hero in the frontend.
+2. The frontend calls `GET /api/heroes/:uid/counters`.
+3. The API returns ranked counter matchups for that target hero.
+4. The UI reveals the top 3 counters in dramatic order (third, second, first).
+5. The UI shows remaining counters as a normal ranked list.
 
-If no matchups exist, return a no-result state rather than inventing recommendations.
+If the API returns an empty list, show a no-result state rather than inventing recommendations.
 
 ## Sorting Rules
 
-Current temporary sort:
+Sorting is implemented on the **analyzer API** before responses reach the browser. Until AI scoring exists, the API may use a temporary deterministic sort such as:
 
-- Higher reviewed evidence weight appears first.
-- Primary proof entries count more than secondary proof entries.
-- High-impact proof entries count more than medium or low-impact proof entries.
+- Higher reviewed evidence weight first.
+- Primary proof entries weighted above secondary proof.
+- High-impact proof above medium or low impact.
 
-Tie-breakers should be deterministic:
-
-- Higher number of reasons.
-- Alphabetical counter hero name.
-- Stable hero ID as final fallback.
-
-This avoids random ordering between renders.
+Tie-breakers should remain deterministic (for example: more reasons, then counter hero name, then stable hero ID).
 
 ## Top 3 Selection
 
@@ -42,14 +36,7 @@ The actual ranking remains rank 1, rank 2, rank 3.
 
 ## Determinism
 
-Analyzer output must be deterministic. The same input dataset and selected enemy hero should always produce the same result.
-
-Deterministic behavior makes the app:
-
-- Easier to test.
-- Easier to explain.
-- Safer to cache.
-- Easier to debug when users question recommendations.
+API ranking for a given hero and dataset version should be deterministic so the same request produces the same order. That makes the product easier to test, explain, cache, and debug.
 
 ## Future AI Scoring
 

@@ -33,15 +33,13 @@ The project should not be designed as a counters-only tool. Later phases may inc
 
 The architecture should keep data, analyzer logic, and UI separate so these features can grow without rewriting the MVP.
 
-## MVP Non-Goals
+## MVP Non-Goals (this frontend repo)
 
-The MVP should not include:
+The Next.js app should not include:
 
-- Backend services.
-- Database or authentication.
-- Live AI-generated recommendations.
+- Its own database or authentication.
 - Scraping or crawling.
 - Live patch/meta ingestion.
 - Full team draft analysis.
 
-The MVP should use static JSON data and local analyzer logic.
+Hero and counter data are served by a separate **analyzer API**. The frontend reads that API via `NEXT_PUBLIC_ANALYZER_API_URL` and does not ship static dataset files.

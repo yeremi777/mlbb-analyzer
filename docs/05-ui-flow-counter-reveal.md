@@ -7,7 +7,7 @@ This document defines the first MVP user flow. It is a UI behavior plan only; im
 1. User searches for an enemy hero.
 2. User selects one hero.
 3. Selected enemy hero appears in a centered card.
-4. App analyzes available counter data and returns ranked counters.
+4. App fetches ranked counters from the analyzer API.
 5. Top 3 counters are revealed dramatically.
 6. Remaining counters appear as a normal ranking list.
 

@@ -1,17 +1,29 @@
 # Dataset Schema
 
-The MVP should begin with static JSON files and TypeScript types. These schemas can evolve as analyzer rules become more advanced.
+These schemas describe the **analyzer API** payloads and the TypeScript types in `src/types/`. The frontend does not load JSON from `public/data/`; it fetches heroes and counters over HTTP.
 
-## Planned Data Files
+## API Surfaces (frontend)
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/heroes?page=&size=` | Paginated hero list for the selector |
+| `GET /api/heroes/:uid` | Single hero record |
+| `GET /api/heroes/:uid/counters` | Ranked counter matchups for one target hero |
+
+Configure the API base URL with `NEXT_PUBLIC_ANALYZER_API_URL`.
+
+## Backend Dataset Layout (analyzer API)
+
+The API service may store reviewed data however it prefers (database, object storage, or split JSON files). A common split-file layout on the **API side** is:
 
 ```txt
-public/data/heroes.json
-public/data/counters.json
-public/data/counters/<target-hero-id>.json
-public/data/rules.json
+heroes.json
+counters.json          # optional index listing per-target files
+counters/<target-hero-id>.json
+rules.json             # future rule-based scoring
 ```
 
-`public/data/counters.json` is an index file. Each referenced file under `public/data/counters/` stores the counter matchup array for one target hero.
+When using a split index, `counters.json` lists paths such as `counters/miya.json`. Each file contains an array of `CounterMatchup` records for that target hero.
 
 ## TypeScript Types
 
@@ -173,7 +185,7 @@ export type CounterRule = {
 }
 ```
 
-Each file listed in the index must contain an array of `CounterMatchup` records where `targetHeroId` matches the file name. For example, `public/data/counters/miya.json` should contain Miya counter records.
+Each file listed in the index must contain an array of `CounterMatchup` records where `targetHeroId` matches the file name. For example, `counters/miya.json` should contain Miya counter records.
 
 ## Counter Proof Fields
 
@@ -211,11 +223,7 @@ Proof priority rules:
 
 ## Hero Dataset Validation
 
-Run hero validation with:
-
-```bash
-npm run validate:heroes
-```
+Validation runs against datasets maintained by the **analyzer API** (not this frontend repo). If you keep a copy of the validation scripts here, point them at the API’s dataset paths.
 
 The hero validator checks that:
 
@@ -231,13 +239,7 @@ The script prints all validation errors and exits non-zero when the dataset is i
 
 ## Counter Dataset Validation
 
-Run counter validation with:
-
-```bash
-npm run validate:counters
-```
-
-The counter validator reads `public/data/counters.json`. If the file contains a `files` index, it loads and validates every referenced split counter file.
+Counter validation runs on the analyzer API’s counter store. If the API uses a `files` index in `counters.json`, the validator loads and checks every referenced split counter file.
 
 The counter validator checks that:
 

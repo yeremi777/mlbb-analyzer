@@ -17,12 +17,11 @@
 - Add TypeScript and Tailwind CSS.
 - Create initial project structure.
 - Prepare data source audit notes.
-- Gather a small starter hero dataset.
-- Gather a small starter counter dataset.
+- Stand up analyzer API with starter hero and counter datasets.
 
 ## Phase 2 - Counter Reveal MVP
 
-- Add local analyzer.
+- Connect frontend to analyzer API (`NEXT_PUBLIC_ANALYZER_API_URL`).
 - Add hero search.
 - Add selected hero card.
 - Add top 3 counter reveal.

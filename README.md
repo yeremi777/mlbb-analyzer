@@ -12,15 +12,21 @@ The first MVP focuses on one flow:
 4. Reveal the top 3 counters dramatically in this order: third, second, first.
 5. Show remaining counters as a normal ranked list.
 
-## Planned Tech Stack
+## Tech Stack
 
 - Next.js
 - TypeScript
 - Tailwind CSS
 - shadcn/ui
-- Static JSON dataset first
-- Local analyzer logic first
-- Vercel deployment later
+- Analyzer API for heroes and counter matchups
+
+## Environment
+
+Copy `.env.example` to `.env.local` and set:
+
+- `NEXT_PUBLIC_ANALYZER_API_URL` — base URL of the analyzer API (no trailing slash)
+
+Vercel: add the same variable in Project Settings → Environment Variables.
 
 ## Planned Features
 
@@ -36,4 +42,4 @@ The first MVP focuses on one flow:
 
 ## Development Status
 
-Planning and documentation phase.
+Counter reveal MVP UI with analyzer API integration. Dataset authoring and validation live in the analyzer API service, not in this frontend repo.
