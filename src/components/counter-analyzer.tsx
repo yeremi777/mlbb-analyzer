@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import type { Hero, CounterHero } from '@/lib/hero-data'
-import { getCountersForHero } from '@/lib/hero-data'
+import { fetchHero, fetchHeroCounters, fetchHeroes } from '@/lib/analyzer-api'
 import { HeroSelector } from './hero-selector'
 import { HeroPortrait } from './hero-portrait'
 import { CounterCard } from './counter-card'
@@ -12,26 +12,74 @@ import { Card } from '@/components/ui/card'
 import { Target, RotateCcw, Crosshair, Loader2 } from 'lucide-react'
 
 type AnalysisState = 'idle' | 'analyzing' | 'revealing' | 'complete'
+type HeroesState = 'loading' | 'ready' | 'error'
 
 export function CounterAnalyzer() {
   const [selectorOpen, setSelectorOpen] = useState(false)
+  const [heroes, setHeroes] = useState<Hero[]>([])
+  const [heroesState, setHeroesState] = useState<HeroesState>('loading')
+  const [heroesError, setHeroesError] = useState<string | null>(null)
   const [selectedHero, setSelectedHero] = useState<Hero | null>(null)
   const [counters, setCounters] = useState<CounterHero[]>([])
   const [analysisState, setAnalysisState] = useState<AnalysisState>('idle')
   const [revealedRanks, setRevealedRanks] = useState<number[]>([])
 
-  const handleSelectHero = (hero: Hero) => {
-    setSelectedHero(hero)
+  useEffect(() => {
+    let active = true;
+
+    async function loadHeroes() {
+      setHeroesState('loading')
+      setHeroesError(null)
+
+      try {
+        const loadedHeroes = await fetchHeroes()
+
+        if (!active) {
+          return
+        }
+
+        setHeroes(loadedHeroes)
+        setHeroesState('ready')
+      } catch (error) {
+        if (!active) {
+          return
+        }
+
+        setHeroes([])
+        setHeroesState('error')
+        setHeroesError(error instanceof Error ? error.message : 'Failed to load heroes')
+      }
+    }
+
+    loadHeroes()
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const handleSelectHero = async (hero: Hero) => {
+    let targetHero = hero
+
+    try {
+      targetHero = await fetchHero(hero.id)
+    } catch {
+      targetHero = hero
+    }
+
+    setSelectedHero(targetHero)
     setAnalysisState('analyzing')
     setRevealedRanks([])
     setCounters([])
-    
-    // Simulate analysis delay
-    setTimeout(() => {
-      const counterData = getCountersForHero(hero.id)
+
+    try {
+      const counterData = await fetchHeroCounters(targetHero.id)
       setCounters(counterData)
+    } catch {
+      setCounters([])
+    } finally {
       setAnalysisState('revealing')
-    }, 1000)
+    }
   }
 
   // Reveal sequence: 3 → 2 → 1 → (4 & 5 together)
@@ -80,19 +128,34 @@ export function CounterAnalyzer() {
       {!selectedHero ? (
         <Card
           className={cn(
-            'relative w-full max-w-md p-8 flex flex-col items-center gap-4 cursor-pointer',
+            'relative w-full max-w-md p-8 flex flex-col items-center gap-4',
+            heroesState === 'ready' && 'cursor-pointer',
             'border-dashed border-2 border-border hover:border-primary/50 transition-all',
             'bg-card hover:bg-muted/50'
           )}
-          onClick={() => setSelectorOpen(true)}
+          onClick={() => {
+            if (heroesState === 'ready') {
+              setSelectorOpen(true)
+            }
+          }}
         >
           <div className="w-24 h-24 rounded-full border-2 border-dashed border-muted-foreground flex items-center justify-center">
-            <Target className="w-10 h-10 text-muted-foreground" />
+            {heroesState === 'loading' ? (
+              <Loader2 className="w-10 h-10 text-muted-foreground animate-spin" />
+            ) : (
+              <Target className="w-10 h-10 text-muted-foreground" />
+            )}
           </div>
           <div className="text-center">
-            <h3 className="font-semibold text-foreground mb-1">Select Enemy Hero</h3>
+            <h3 className="font-semibold text-foreground mb-1">
+              {heroesState === 'loading' ? 'Loading Heroes' : 'Select Enemy Hero'}
+            </h3>
             <p className="text-sm text-muted-foreground">
-              Click to choose an enemy hero to analyze
+              {heroesState === 'error'
+                ? heroesError ?? 'Analyzer API is unavailable'
+                : heroesState === 'loading'
+                  ? 'Fetching hero data from the analyzer API'
+                  : 'Click to choose an enemy hero to analyze'}
             </p>
           </div>
         </Card>
@@ -236,6 +299,7 @@ export function CounterAnalyzer() {
       {/* Hero Selector Modal */}
       <HeroSelector
         open={selectorOpen}
+        heroes={heroes}
         onOpenChange={setSelectorOpen}
         onSelectHero={handleSelectHero}
       />

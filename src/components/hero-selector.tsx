@@ -6,26 +6,27 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Search } from 'lucide-react'
-import { HEROES, HERO_ROLES, type Hero, type HeroRole } from '@/lib/hero-data'
+import { HERO_ROLES, type Hero, type HeroRole } from '@/lib/hero-data'
 import { HeroPortrait } from './hero-portrait'
 
 interface HeroSelectorProps {
   open: boolean
+  heroes: Hero[]
   onOpenChange: (open: boolean) => void
   onSelectHero: (hero: Hero) => void
 }
 
-export function HeroSelector({ open, onOpenChange, onSelectHero }: HeroSelectorProps) {
+export function HeroSelector({ open, heroes, onOpenChange, onSelectHero }: HeroSelectorProps) {
   const [search, setSearch] = useState('')
   const [selectedRole, setSelectedRole] = useState<HeroRole | 'All'>('All')
   
   const filteredHeroes = useMemo(() => {
-    return HEROES.filter(hero => {
+    return heroes.filter(hero => {
       const matchesSearch = hero.name.toLowerCase().includes(search.toLowerCase())
       const matchesRole = selectedRole === 'All' || hero.role === selectedRole
       return matchesSearch && matchesRole
     })
-  }, [search, selectedRole])
+  }, [heroes, search, selectedRole])
 
   const handleSelectHero = (hero: Hero) => {
     onSelectHero(hero)
