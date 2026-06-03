@@ -19,6 +19,37 @@ type HeroCounterResponse = {
   patchVersion?: string;
 };
 
+export type AnalyzerApiError = {
+  error: {
+    code: string;
+    message: string;
+  };
+};
+
+export type AnalyzeScoresResponse = {
+  targetHeroId: string;
+  source: "ai";
+  recommendations: Array<{
+    rank: number;
+    counterHeroId: string;
+    score: number;
+    confidence: number;
+  }>;
+};
+
+export type AnalyzeDetailResponse = {
+  targetHeroId: string;
+  counterHeroId: string;
+  source: "ai";
+  score: number;
+  confidence: number;
+  summary: string;
+  strengths: string[];
+  conditions: string[];
+  failureCases: string[];
+  evidenceIds: string[];
+};
+
 const roleLabelById: Record<DatasetHeroRole, Hero["role"]> = {
   tank: "Tank",
   fighter: "Fighter",
@@ -38,6 +69,20 @@ function getAnalyzerApiUrl(): string {
   return apiUrl.replace(/\/$/, "");
 }
 
+async function getErrorMessage(response: Response): Promise<string> {
+  try {
+    const data = (await response.json()) as Partial<AnalyzerApiError>;
+
+    if (data.error?.message) {
+      return data.error.message;
+    }
+
+    return JSON.stringify(data);
+  } catch {
+    return response.text();
+  }
+}
+
 function toUiHero(hero: DatasetHero): Hero {
   return {
     id: hero.uid,
@@ -53,13 +98,7 @@ export async function fetchHero(heroId: string): Promise<Hero> {
   const response = await fetch(`${getAnalyzerApiUrl()}/api/heroes/${encodeURIComponent(heroId)}`);
 
   if (!response.ok) {
-    let detail = "";
-
-    try {
-      detail = JSON.stringify(await response.json());
-    } catch {
-      detail = await response.text();
-    }
+    const detail = await getErrorMessage(response);
 
     throw new Error(`Failed to fetch hero ${heroId}: ${response.status}${detail ? ` ${detail}` : ""}`);
   }
@@ -71,13 +110,7 @@ export async function fetchHeroCounters(heroId: string): Promise<CounterHero[]> 
   const response = await fetch(`${getAnalyzerApiUrl()}/api/heroes/${encodeURIComponent(heroId)}/counters`);
 
   if (!response.ok) {
-    let detail = "";
-
-    try {
-      detail = JSON.stringify(await response.json());
-    } catch {
-      detail = await response.text();
-    }
+    const detail = await getErrorMessage(response);
 
     throw new Error(`Failed to fetch counters for ${heroId}: ${response.status}${detail ? ` ${detail}` : ""}`);
   }
@@ -96,8 +129,54 @@ export async function fetchHeroCounters(heroId: string): Promise<CounterHero[]> 
       rank: index + 1,
       reason: matchup.reasons[0] ?? "",
       tags: matchup.counterTypes,
+      score: 0,
     };
   });
+}
+
+export async function analyzeCounterScores(
+  targetHeroId: string,
+  language = "en",
+): Promise<AnalyzeScoresResponse> {
+  const response = await fetch(`${getAnalyzerApiUrl()}/api/counters/analyze-score`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ targetHeroId, language }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  const data = (await response.json()) as AnalyzeScoresResponse;
+
+  if (!Array.isArray(data.recommendations)) {
+    throw new Error("Invalid analyze-score response: recommendations must be an array");
+  }
+
+  return data;
+}
+
+export async function analyzeCounterDetail(
+  targetHeroId: string,
+  counterHeroId: string,
+  language = "en",
+): Promise<AnalyzeDetailResponse> {
+  const response = await fetch(`${getAnalyzerApiUrl()}/api/counters/analyze-detail`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ targetHeroId, counterHeroId, language }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  return (await response.json()) as AnalyzeDetailResponse;
 }
 
 export async function fetchHeroes(): Promise<Hero[]> {
@@ -125,13 +204,7 @@ async function fetchHeroesPage(page: number, size: number): Promise<HeroesRespon
   const response = await fetch(url.toString());
 
   if (!response.ok) {
-    let detail = "";
-
-    try {
-      detail = JSON.stringify(await response.json());
-    } catch {
-      detail = await response.text();
-    }
+    const detail = await getErrorMessage(response);
 
     throw new Error(`Failed to fetch heroes: ${response.status}${detail ? ` ${detail}` : ""}`);
   }

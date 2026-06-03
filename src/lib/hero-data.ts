@@ -15,6 +15,8 @@ export interface CounterHero extends Hero {
   rank: number;
   reason: string;
   tags: string[];
+  score: number;
+  confidence?: number;
 }
 
 export const HERO_ROLES: HeroRole[] = [

@@ -1,9 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 import type { Hero, CounterHero } from '@/lib/hero-data'
-import { fetchHero, fetchHeroCounters, fetchHeroes } from '@/lib/analyzer-api'
+import {
+  analyzeCounterDetail,
+  analyzeCounterScores,
+  fetchHero,
+  fetchHeroCounters,
+  fetchHeroes,
+  type AnalyzeDetailResponse,
+} from '@/lib/analyzer-api'
 import { HeroSelector } from './hero-selector'
 import { HeroPortrait } from './hero-portrait'
 import { CounterCard } from './counter-card'
@@ -13,6 +20,11 @@ import { Target, RotateCcw, Crosshair, Loader2 } from 'lucide-react'
 
 type AnalysisState = 'idle' | 'analyzing' | 'revealing' | 'complete'
 type HeroesState = 'loading' | 'ready' | 'error'
+type DetailState = 'idle' | 'loading' | 'ready' | 'error'
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback
+}
 
 export function CounterAnalyzer() {
   const [selectorOpen, setSelectorOpen] = useState(false)
@@ -22,7 +34,17 @@ export function CounterAnalyzer() {
   const [selectedHero, setSelectedHero] = useState<Hero | null>(null)
   const [counters, setCounters] = useState<CounterHero[]>([])
   const [analysisState, setAnalysisState] = useState<AnalysisState>('idle')
+  const [scoresReady, setScoresReady] = useState(false)
   const [revealedRanks, setRevealedRanks] = useState<number[]>([])
+  const [displayScores, setDisplayScores] = useState<Record<string, number>>({})
+  const [analysisError, setAnalysisError] = useState<string | null>(null)
+  const [activeCounterId, setActiveCounterId] = useState<string | null>(null)
+  const [detailState, setDetailState] = useState<DetailState>('idle')
+  const [detail, setDetail] = useState<AnalyzeDetailResponse | null>(null)
+  const [detailError, setDetailError] = useState<string | null>(null)
+  const scoreTickerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const finalScoreAnimationRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const displayScoresRef = useRef<Record<string, number>>({})
 
   useEffect(() => {
     let active = true;
@@ -58,6 +80,60 @@ export function CounterAnalyzer() {
     }
   }, [])
 
+  useEffect(() => {
+    displayScoresRef.current = displayScores
+  }, [displayScores])
+
+  const stopScoreTicker = useCallback(() => {
+    if (scoreTickerRef.current) {
+      clearInterval(scoreTickerRef.current)
+      scoreTickerRef.current = null
+    }
+  }, [])
+
+  const stopFinalScoreAnimation = useCallback(() => {
+    if (finalScoreAnimationRef.current) {
+      clearInterval(finalScoreAnimationRef.current)
+      finalScoreAnimationRef.current = null
+    }
+  }, [])
+
+  const animateScoresToFinal = useCallback((rankedCounters: CounterHero[]) => {
+    stopScoreTicker()
+    stopFinalScoreAnimation()
+
+    const startScores = rankedCounters.reduce<Record<string, number>>((scores, counter) => {
+      scores[counter.id] = displayScoresRef.current[counter.id] ?? 0
+      return scores
+    }, {})
+    const finalScores = rankedCounters.reduce<Record<string, number>>((scores, counter) => {
+      scores[counter.id] = counter.score
+      return scores
+    }, {})
+    const startedAt = Date.now()
+    const duration = 700
+
+    finalScoreAnimationRef.current = setInterval(() => {
+      const progress = Math.min((Date.now() - startedAt) / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3)
+
+      setDisplayScores(
+        Object.fromEntries(
+          rankedCounters.map((counter) => {
+            const start = startScores[counter.id] ?? 0
+            const end = finalScores[counter.id] ?? 0
+
+            return [counter.id, Math.round(start + (end - start) * eased)]
+          }),
+        ),
+      )
+
+      if (progress >= 1) {
+        stopFinalScoreAnimation()
+      }
+    }, 50)
+  }, [stopFinalScoreAnimation, stopScoreTicker])
+
   const handleSelectHero = async (hero: Hero) => {
     let targetHero = hero
 
@@ -69,16 +145,79 @@ export function CounterAnalyzer() {
 
     setSelectedHero(targetHero)
     setAnalysisState('analyzing')
+    setScoresReady(false)
     setRevealedRanks([])
     setCounters([])
+    setDisplayScores({})
+    setAnalysisError(null)
+    setActiveCounterId(null)
+    setDetailState('idle')
+    setDetail(null)
+    setDetailError(null)
+    stopScoreTicker()
+    stopFinalScoreAnimation()
 
     try {
       const counterData = await fetchHeroCounters(targetHero.id)
       setCounters(counterData)
-    } catch {
+      setDisplayScores(
+        Object.fromEntries(counterData.map((counter) => [counter.id, 0])),
+      )
+
+      try {
+        const scoreData = await analyzeCounterScores(targetHero.id)
+        const scoreByHeroId = new Map(
+          scoreData.recommendations.map((recommendation) => [
+            recommendation.counterHeroId,
+            recommendation,
+          ]),
+        )
+
+        const missingScore = counterData.find((counter) => !scoreByHeroId.has(counter.id))
+
+        if (missingScore) {
+          throw new Error(`AI score response omitted ${missingScore.name}`)
+        }
+
+        const rankedCounters = counterData
+          .map((counter) => {
+            const recommendation = scoreByHeroId.get(counter.id)!
+
+            return {
+              ...counter,
+              rank: recommendation.rank,
+              score: recommendation.score,
+              confidence: recommendation.confidence,
+            }
+          })
+          .sort((a, b) => a.rank - b.rank)
+
+        setCounters(rankedCounters)
+        setDisplayScores(
+          Object.fromEntries(
+            rankedCounters.map((counter) => [
+              counter.id,
+              counter.rank > 3 ? counter.score : 0,
+            ]),
+          ),
+        )
+        setScoresReady(true)
+        setAnalysisState('revealing')
+      } catch (error) {
+        stopScoreTicker()
+        stopFinalScoreAnimation()
+        setAnalysisError(getErrorMessage(error, 'Failed to analyze counter scores'))
+        setDisplayScores(
+          Object.fromEntries(counterData.map((counter) => [counter.id, 0])),
+        )
+        setScoresReady(false)
+        setAnalysisState('complete')
+      }
+    } catch (error) {
       setCounters([])
-    } finally {
-      setAnalysisState('revealing')
+      setAnalysisError(getErrorMessage(error, 'Failed to load counter matchups'))
+      setScoresReady(false)
+      setAnalysisState('complete')
     }
   }
 
@@ -87,6 +226,8 @@ export function CounterAnalyzer() {
     if (analysisState !== 'revealing') return
 
     const revealSequence: number[][] = [[3], [2], [1], [4, 5]]
+    const scoreAnimationDelay = 500
+    const scoreAnimationTimeouts: Array<ReturnType<typeof setTimeout>> = []
     let currentIndex = 0
 
     const interval = setInterval(() => {
@@ -99,6 +240,18 @@ export function CounterAnalyzer() {
           }
           return prev
         })
+        const countersToAnimate = counters.filter((counter) =>
+          counter.rank <= 3 && ranksToReveal.includes(counter.rank),
+        )
+
+        if (countersToAnimate.length > 0) {
+          scoreAnimationTimeouts.push(
+            setTimeout(() => {
+              animateScoresToFinal(countersToAnimate)
+            }, scoreAnimationDelay),
+          )
+        }
+
         currentIndex++
       } else {
         clearInterval(interval)
@@ -106,14 +259,46 @@ export function CounterAnalyzer() {
       }
     }, 800)
 
-    return () => clearInterval(interval)
-  }, [analysisState])
+    return () => {
+      clearInterval(interval)
+      scoreAnimationTimeouts.forEach(clearTimeout)
+    }
+  }, [analysisState, animateScoresToFinal, counters])
 
   const handleReset = () => {
+    stopScoreTicker()
+    stopFinalScoreAnimation()
     setSelectedHero(null)
     setCounters([])
     setAnalysisState('idle')
+    setScoresReady(false)
     setRevealedRanks([])
+    setDisplayScores({})
+    setAnalysisError(null)
+    setActiveCounterId(null)
+    setDetailState('idle')
+    setDetail(null)
+    setDetailError(null)
+  }
+
+  const handleOpenCounter = async (counter: CounterHero) => {
+    if (!selectedHero) {
+      return
+    }
+
+    setActiveCounterId(counter.id)
+    setDetailState('loading')
+    setDetail(null)
+    setDetailError(null)
+
+    try {
+      const detailData = await analyzeCounterDetail(selectedHero.id, counter.id)
+      setDetail(detailData)
+      setDetailState('ready')
+    } catch (error) {
+      setDetailState('error')
+      setDetailError(getErrorMessage(error, 'Failed to analyze counter detail'))
+    }
   }
 
   // Get counters by rank
@@ -121,6 +306,9 @@ export function CounterAnalyzer() {
   const rank2 = counters.find(c => c.rank === 2)
   const rank3 = counters.find(c => c.rank === 3)
   const remainingCounters = counters.filter(c => c.rank > 3)
+  const activeCounter = counters.find((counter) => counter.id === activeCounterId) ?? null
+  const isCounterVisible = (rank: number) =>
+    revealedRanks.includes(rank)
 
   return (
     <div className="flex flex-col items-center gap-8">
@@ -199,8 +387,15 @@ export function CounterAnalyzer() {
         </div>
       )}
 
+      {analysisError && (
+        <Card className="w-full max-w-2xl border-destructive/40 bg-destructive/10 p-4 text-center">
+          <h2 className="text-sm font-bold text-destructive">Analyzer API Error</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{analysisError}</p>
+        </Card>
+      )}
+
       {/* Counter Results */}
-      {(analysisState === 'revealing' || analysisState === 'complete') && counters.length > 0 && (
+      {scoresReady && (analysisState === 'revealing' || analysisState === 'complete') && counters.length > 0 && (
         <div className="w-full max-w-3xl space-y-8">
           {/* Section Header */}
           <div className="text-center mb-2">
@@ -218,13 +413,16 @@ export function CounterAnalyzer() {
                 <div
                   className={cn(
                     'flex flex-col items-center transition-all duration-500',
-                    revealedRanks.includes(3) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+                    isCounterVisible(3) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
                   )}
                 >
                   <CounterCard
                     counter={rank3}
-                    isRevealing={revealedRanks.includes(3)}
+                    displayScore={displayScores[rank3.id]}
+                    isRevealing={isCounterVisible(3)}
                     delay={0}
+                    selected={activeCounterId === rank3.id}
+                    onClick={() => handleOpenCounter(rank3)}
                   />
                 </div>
               )}
@@ -234,13 +432,16 @@ export function CounterAnalyzer() {
                 <div
                   className={cn(
                     'flex flex-col items-center transition-all duration-500 -translate-y-6 sm:-translate-y-8',
-                    revealedRanks.includes(1) ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    isCounterVisible(1) ? 'opacity-100' : 'opacity-0 pointer-events-none'
                   )}
                 >
                   <CounterCard
                     counter={rank1}
-                    isRevealing={revealedRanks.includes(1)}
+                    displayScore={displayScores[rank1.id]}
+                    isRevealing={isCounterVisible(1)}
                     delay={0}
+                    selected={activeCounterId === rank1.id}
+                    onClick={() => handleOpenCounter(rank1)}
                   />
                 </div>
               )}
@@ -250,13 +451,16 @@ export function CounterAnalyzer() {
                 <div
                   className={cn(
                     'flex flex-col items-center transition-all duration-500',
-                    revealedRanks.includes(2) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+                    isCounterVisible(2) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
                   )}
                 >
                   <CounterCard
                     counter={rank2}
-                    isRevealing={revealedRanks.includes(2)}
+                    displayScore={displayScores[rank2.id]}
+                    isRevealing={isCounterVisible(2)}
                     delay={0}
+                    selected={activeCounterId === rank2.id}
+                    onClick={() => handleOpenCounter(rank2)}
                   />
                 </div>
               )}
@@ -277,12 +481,50 @@ export function CounterAnalyzer() {
                   <CounterCard
                     key={counter.id}
                     counter={counter}
-                    isRevealing={revealedRanks.includes(counter.rank)}
+                    displayScore={displayScores[counter.id]}
+                    isRevealing={isCounterVisible(counter.rank)}
                     delay={0}
+                    selected={activeCounterId === counter.id}
+                    onClick={() => handleOpenCounter(counter)}
                   />
                 ))}
               </div>
             </div>
+          )}
+
+          {activeCounter && (
+            <Card className="border-border bg-card p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-base font-bold text-foreground">
+                    {activeCounter.name} vs {selectedHero?.name}
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Score {Math.round(displayScores[activeCounter.id] ?? activeCounter.score)}
+                    {typeof activeCounter.confidence === 'number' && ` / ${activeCounter.confidence}% confidence`}
+                  </p>
+                </div>
+                {detailState === 'loading' && (
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                )}
+              </div>
+
+              {detailState === 'error' && (
+                <p className="mt-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-muted-foreground">
+                  {detailError}
+                </p>
+              )}
+
+              {detailState === 'ready' && detail && (
+                <div className="mt-4 space-y-4">
+                  <p className="text-sm leading-6 text-foreground">{detail.summary}</p>
+
+                  <DetailList title="Strengths" items={detail.strengths} />
+                  <DetailList title="Conditions" items={detail.conditions} />
+                  <DetailList title="Failure Cases" items={detail.failureCases} />
+                </div>
+              )}
+            </Card>
           )}
         </div>
       )}
@@ -303,6 +545,27 @@ export function CounterAnalyzer() {
         onOpenChange={setSelectorOpen}
         onSelectHero={handleSelectHero}
       />
+    </div>
+  )
+}
+
+function DetailList({ title, items }: { title: string; items: string[] }) {
+  if (items.length === 0) {
+    return null
+  }
+
+  return (
+    <div>
+      <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </h4>
+      <ul className="mt-2 space-y-2">
+        {items.map((item) => (
+          <li key={item} className="rounded-md bg-muted/40 px-3 py-2 text-sm text-foreground">
+            {item}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

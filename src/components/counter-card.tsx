@@ -10,6 +10,9 @@ interface CounterCardProps {
   counter: CounterHero
   isRevealing?: boolean
   delay?: number
+  displayScore?: number
+  selected?: boolean
+  onClick?: () => void
 }
 
 const rankConfig = {
@@ -43,9 +46,17 @@ const rankConfig = {
 }
 
 // Circular card for top 3 ranks
-export function CounterCard({ counter, isRevealing = false, delay = 0 }: CounterCardProps) {
+export function CounterCard({
+  counter,
+  isRevealing = false,
+  delay = 0,
+  displayScore,
+  selected = false,
+  onClick,
+}: CounterCardProps) {
   const isTopThree = counter.rank <= 3
   const config = rankConfig[counter.rank as 1 | 2 | 3]
+  const score = Math.round(displayScore ?? counter.score)
   
   if (isTopThree && config) {
     const Icon = config.icon
@@ -53,8 +64,19 @@ export function CounterCard({ counter, isRevealing = false, delay = 0 }: Counter
 
     return (
       <div
+        role={onClick ? 'button' : undefined}
+        tabIndex={onClick ? 0 : undefined}
+        onClick={onClick}
+        onKeyDown={(event) => {
+          if (onClick && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault()
+            onClick()
+          }
+        }}
         className={cn(
-          'flex flex-col items-center text-center transition-all',
+          'flex flex-col items-center text-center transition-all rounded-lg outline-none',
+          onClick && 'cursor-pointer hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+          selected && 'scale-[1.03]',
           isRankOne ? 'w-[160px] pt-1' : 'w-[130px]',
           isRevealing && 'animate-reveal'
         )}
@@ -89,6 +111,17 @@ export function CounterCard({ counter, isRevealing = false, delay = 0 }: Counter
         {/* Role */}
         <p className="text-xs text-muted-foreground">{counter.role}</p>
 
+        <div className="mt-2 min-h-[38px]">
+          <div className={cn('font-mono font-bold', isRankOne ? 'text-2xl' : 'text-xl', config.textClass)}>
+            {score}
+          </div>
+          {typeof counter.confidence === 'number' && (
+            <p className="text-[10px] text-muted-foreground">
+              {counter.confidence}% confidence
+            </p>
+          )}
+        </div>
+
         {/* Tags - fixed height container */}
         <div className="flex flex-wrap justify-center gap-1 mt-2 min-h-[24px]">
           {counter.tags.slice(0, 2).map(tag => (
@@ -108,8 +141,19 @@ export function CounterCard({ counter, isRevealing = false, delay = 0 }: Counter
   // Rank 4-5 compact circular cards
   return (
     <div
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={(event) => {
+        if (onClick && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault()
+          onClick()
+        }
+      }}
       className={cn(
-        'flex flex-col items-center text-center transition-all',
+        'flex flex-col items-center text-center transition-all rounded-lg outline-none',
+        onClick && 'cursor-pointer hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+        selected && 'scale-[1.03]',
         isRevealing && 'animate-reveal'
       )}
       style={{ animationDelay: isRevealing ? `${delay}ms` : '0ms' }}
@@ -131,6 +175,13 @@ export function CounterCard({ counter, isRevealing = false, delay = 0 }: Counter
       
       {/* Role */}
       <p className="text-[10px] text-muted-foreground">{counter.role}</p>
+
+      <div className="mt-1 min-h-[28px]">
+        <div className="font-mono text-base font-bold text-primary">{score}</div>
+        {typeof counter.confidence === 'number' && (
+          <p className="text-[9px] text-muted-foreground">{counter.confidence}% conf.</p>
+        )}
+      </div>
       
     </div>
   )
