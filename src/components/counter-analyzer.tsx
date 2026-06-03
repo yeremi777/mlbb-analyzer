@@ -45,6 +45,8 @@ export function CounterAnalyzer() {
   const scoreTickerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const finalScoreAnimationRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const displayScoresRef = useRef<Record<string, number>>({})
+  const resultsSectionRef = useRef<HTMLDivElement | null>(null)
+  const hasFocusedResultsRef = useRef(false)
 
   useEffect(() => {
     let active = true;
@@ -83,6 +85,37 @@ export function CounterAnalyzer() {
   useEffect(() => {
     displayScoresRef.current = displayScores
   }, [displayScores])
+
+  useEffect(() => {
+    if (
+      !scoresReady ||
+      (analysisState !== 'revealing' && analysisState !== 'complete') ||
+      counters.length === 0 ||
+      analysisError ||
+      hasFocusedResultsRef.current
+    ) {
+      return
+    }
+
+    const frameId = requestAnimationFrame(() => {
+      const resultsSection = resultsSectionRef.current
+
+      if (!resultsSection) {
+        return
+      }
+
+      hasFocusedResultsRef.current = true
+      resultsSection.focus({ preventScroll: true })
+      resultsSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    })
+
+    return () => {
+      cancelAnimationFrame(frameId)
+    }
+  }, [analysisError, analysisState, counters.length, scoresReady])
 
   const stopScoreTicker = useCallback(() => {
     if (scoreTickerRef.current) {
@@ -154,6 +187,7 @@ export function CounterAnalyzer() {
     setDetailState('idle')
     setDetail(null)
     setDetailError(null)
+    hasFocusedResultsRef.current = false
     stopScoreTicker()
     stopFinalScoreAnimation()
 
@@ -279,6 +313,7 @@ export function CounterAnalyzer() {
     setDetailState('idle')
     setDetail(null)
     setDetailError(null)
+    hasFocusedResultsRef.current = false
   }
 
   const handleOpenCounter = async (counter: CounterHero) => {
@@ -396,7 +431,11 @@ export function CounterAnalyzer() {
 
       {/* Counter Results */}
       {scoresReady && (analysisState === 'revealing' || analysisState === 'complete') && counters.length > 0 && (
-        <div className="w-full max-w-3xl space-y-8">
+        <div
+          ref={resultsSectionRef}
+          tabIndex={-1}
+          className="w-full max-w-3xl scroll-mt-8 space-y-8 outline-none"
+        >
           {/* Section Header */}
           <div className="text-center mb-2">
             <h2 className="text-lg font-bold text-foreground mb-1">Counter Recommendations</h2>
