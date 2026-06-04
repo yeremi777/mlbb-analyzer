@@ -46,6 +46,8 @@ export function CounterAnalyzer() {
   const finalScoreAnimationRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const displayScoresRef = useRef<Record<string, number>>({})
   const resultsSectionRef = useRef<HTMLDivElement | null>(null)
+  const detailCardRef = useRef<HTMLDivElement | null>(null)
+  const pendingDetailFocusRef = useRef<string | null>(null)
   const hasFocusedResultsRef = useRef(false)
 
   useEffect(() => {
@@ -116,6 +118,31 @@ export function CounterAnalyzer() {
       cancelAnimationFrame(frameId)
     }
   }, [analysisError, analysisState, counters.length, scoresReady])
+
+  useEffect(() => {
+    if (!activeCounterId || pendingDetailFocusRef.current !== activeCounterId) {
+      return
+    }
+
+    const frameId = requestAnimationFrame(() => {
+      const detailCard = detailCardRef.current
+
+      if (!detailCard) {
+        return
+      }
+
+      pendingDetailFocusRef.current = null
+      detailCard.focus({ preventScroll: true })
+      detailCard.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    })
+
+    return () => {
+      cancelAnimationFrame(frameId)
+    }
+  }, [activeCounterId, detailState])
 
   const stopScoreTicker = useCallback(() => {
     if (scoreTickerRef.current) {
@@ -188,6 +215,7 @@ export function CounterAnalyzer() {
     setDetail(null)
     setDetailError(null)
     hasFocusedResultsRef.current = false
+    pendingDetailFocusRef.current = null
     stopScoreTicker()
     stopFinalScoreAnimation()
 
@@ -314,6 +342,7 @@ export function CounterAnalyzer() {
     setDetail(null)
     setDetailError(null)
     hasFocusedResultsRef.current = false
+    pendingDetailFocusRef.current = null
   }
 
   const handleOpenCounter = async (counter: CounterHero) => {
@@ -321,6 +350,7 @@ export function CounterAnalyzer() {
       return
     }
 
+    pendingDetailFocusRef.current = counter.id
     setActiveCounterId(counter.id)
     setDetailState('loading')
     setDetail(null)
@@ -532,10 +562,15 @@ export function CounterAnalyzer() {
           )}
 
           {activeCounter && (
-            <Card className="border-border bg-card p-5">
+            <Card
+              ref={detailCardRef}
+              tabIndex={-1}
+              aria-labelledby="counter-analysis-title"
+              className="scroll-mt-8 border-border bg-card p-5 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-base font-bold text-foreground">
+                  <h3 id="counter-analysis-title" className="text-base font-bold text-foreground">
                     {activeCounter.name} vs {selectedHero?.name}
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
