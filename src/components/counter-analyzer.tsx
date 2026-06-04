@@ -16,7 +16,7 @@ import { HeroPortrait } from './hero-portrait'
 import { CounterCard } from './counter-card'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Target, RotateCcw, Crosshair, Loader2 } from 'lucide-react'
+import { Target, Search, Crosshair, Loader2 } from 'lucide-react'
 
 type AnalysisState = 'idle' | 'analyzing' | 'revealing' | 'complete'
 type HeroesState = 'loading' | 'ready' | 'error'
@@ -48,6 +48,7 @@ export function CounterAnalyzer() {
   const resultsSectionRef = useRef<HTMLDivElement | null>(null)
   const detailCardRef = useRef<HTMLDivElement | null>(null)
   const pendingDetailFocusRef = useRef<string | null>(null)
+  const analysisRequestRef = useRef(0)
   const hasFocusedResultsRef = useRef(false)
 
   useEffect(() => {
@@ -195,12 +196,19 @@ export function CounterAnalyzer() {
   }, [stopFinalScoreAnimation, stopScoreTicker])
 
   const handleSelectHero = async (hero: Hero) => {
+    const requestId = analysisRequestRef.current + 1
+    analysisRequestRef.current = requestId
+    const isActiveRequest = () => analysisRequestRef.current === requestId
     let targetHero = hero
 
     try {
       targetHero = await fetchHero(hero.id)
     } catch {
       targetHero = hero
+    }
+
+    if (!isActiveRequest()) {
+      return
     }
 
     setSelectedHero(targetHero)
@@ -221,6 +229,11 @@ export function CounterAnalyzer() {
 
     try {
       const counterData = await fetchHeroCounters(targetHero.id)
+
+      if (!isActiveRequest()) {
+        return
+      }
+
       setCounters(counterData)
       setDisplayScores(
         Object.fromEntries(counterData.map((counter) => [counter.id, 0])),
@@ -228,6 +241,11 @@ export function CounterAnalyzer() {
 
       try {
         const scoreData = await analyzeCounterScores(targetHero.id)
+
+        if (!isActiveRequest()) {
+          return
+        }
+
         const scoreByHeroId = new Map(
           scoreData.recommendations.map((recommendation) => [
             recommendation.counterHeroId,
@@ -266,6 +284,10 @@ export function CounterAnalyzer() {
         setScoresReady(true)
         setAnalysisState('revealing')
       } catch (error) {
+        if (!isActiveRequest()) {
+          return
+        }
+
         stopScoreTicker()
         stopFinalScoreAnimation()
         setAnalysisError(getErrorMessage(error, 'Failed to analyze counter scores'))
@@ -276,6 +298,10 @@ export function CounterAnalyzer() {
         setAnalysisState('complete')
       }
     } catch (error) {
+      if (!isActiveRequest()) {
+        return
+      }
+
       setCounters([])
       setAnalysisError(getErrorMessage(error, 'Failed to load counter matchups'))
       setScoresReady(false)
@@ -326,24 +352,6 @@ export function CounterAnalyzer() {
       scoreAnimationTimeouts.forEach(clearTimeout)
     }
   }, [analysisState, animateScoresToFinal, counters])
-
-  const handleReset = () => {
-    stopScoreTicker()
-    stopFinalScoreAnimation()
-    setSelectedHero(null)
-    setCounters([])
-    setAnalysisState('idle')
-    setScoresReady(false)
-    setRevealedRanks([])
-    setDisplayScores({})
-    setAnalysisError(null)
-    setActiveCounterId(null)
-    setDetailState('idle')
-    setDetail(null)
-    setDetailError(null)
-    hasFocusedResultsRef.current = false
-    pendingDetailFocusRef.current = null
-  }
 
   const handleOpenCounter = async (counter: CounterHero) => {
     if (!selectedHero) {
@@ -418,10 +426,11 @@ export function CounterAnalyzer() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleReset}
+              onClick={() => setSelectorOpen(true)}
+              disabled={heroesState !== 'ready'}
               className="text-muted-foreground hover:text-foreground"
             >
-              <RotateCcw className="w-4 h-4 mr-1" />
+              <Search className="w-4 h-4 mr-1" />
               Change
             </Button>
           </div>
