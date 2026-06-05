@@ -140,6 +140,7 @@ export async function analyzeCounterScores(
 ): Promise<AnalyzeScoresResponse> {
   const response = await fetch(`${getAnalyzerApiUrl()}/api/counters/analyze-score`, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -166,6 +167,7 @@ export async function analyzeCounterDetail(
 ): Promise<AnalyzeDetailResponse> {
   const response = await fetch(`${getAnalyzerApiUrl()}/api/counters/analyze-detail`, {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
