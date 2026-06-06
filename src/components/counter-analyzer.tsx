@@ -14,6 +14,7 @@ import {
   type AnalyzeDetailResponse,
 } from '@/lib/analyzer-api'
 import { errorMessageKey } from '@/i18n/error-messages'
+import { usePrefersReducedMotion } from '@/hooks/use-reduced-motion'
 import { HeroSelector } from './hero-selector'
 import { HeroPortrait } from './hero-portrait'
 import { CounterCard } from './counter-card'
@@ -29,6 +30,7 @@ export function CounterAnalyzer() {
   const t = useTranslations('analyzer')
   const tErrors = useTranslations('errors')
   const locale = useLocale()
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   const localizeError = useCallback(
     (error: unknown): string => {
@@ -121,7 +123,7 @@ export function CounterAnalyzer() {
       hasFocusedResultsRef.current = true
       resultsSection.focus({ preventScroll: true })
       resultsSection.scrollIntoView({
-        behavior: 'smooth',
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
         block: 'start',
       })
     })
@@ -129,7 +131,7 @@ export function CounterAnalyzer() {
     return () => {
       cancelAnimationFrame(frameId)
     }
-  }, [analysisError, analysisState, counters.length, scoresReady])
+  }, [analysisError, analysisState, counters.length, scoresReady, prefersReducedMotion])
 
   useEffect(() => {
     if (!activeCounterId || pendingDetailFocusRef.current !== activeCounterId) {
@@ -146,7 +148,7 @@ export function CounterAnalyzer() {
       pendingDetailFocusRef.current = null
       detailCard.focus({ preventScroll: true })
       detailCard.scrollIntoView({
-        behavior: 'smooth',
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
         block: 'start',
       })
     })
@@ -154,7 +156,7 @@ export function CounterAnalyzer() {
     return () => {
       cancelAnimationFrame(frameId)
     }
-  }, [activeCounterId, detailState])
+  }, [activeCounterId, detailState, prefersReducedMotion])
 
   const stopScoreTicker = useCallback(() => {
     if (scoreTickerRef.current) {
@@ -284,16 +286,28 @@ export function CounterAnalyzer() {
           .sort((a, b) => a.rank - b.rank)
 
         setCounters(rankedCounters)
-        setDisplayScores(
-          Object.fromEntries(
-            rankedCounters.map((counter) => [
-              counter.id,
-              counter.rank > 3 ? counter.score : 0,
-            ]),
-          ),
-        )
-        setScoresReady(true)
-        setAnalysisState('revealing')
+
+        if (prefersReducedMotion) {
+          // Skip the staged reveal + score count-up: show every card at its
+          // final score immediately.
+          setDisplayScores(
+            Object.fromEntries(rankedCounters.map((counter) => [counter.id, counter.score])),
+          )
+          setRevealedRanks(rankedCounters.map((counter) => counter.rank))
+          setScoresReady(true)
+          setAnalysisState('complete')
+        } else {
+          setDisplayScores(
+            Object.fromEntries(
+              rankedCounters.map((counter) => [
+                counter.id,
+                counter.rank > 3 ? counter.score : 0,
+              ]),
+            ),
+          )
+          setScoresReady(true)
+          setAnalysisState('revealing')
+        }
       } catch (error) {
         if (!isActiveRequest()) {
           return

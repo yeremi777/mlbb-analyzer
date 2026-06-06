@@ -68,7 +68,7 @@ Data validation should run before relying on generated or manually edited datase
 - API helpers should be thin wrappers around `fetch`.
 - UI components should not hardcode API base URLs; use `NEXT_PUBLIC_ANALYZER_API_URL`.
 - Handle loading and error states when the API is unavailable.
-- Treat API response shapes as defined in `docs/02-dataset-schema.md` and `src/types/`.
+- Treat API response shapes as defined in `docs/01-api-contract.md` and `src/types/`.
 
 ## Commit Message Style
 

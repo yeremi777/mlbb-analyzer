@@ -32,20 +32,3 @@ export type CounterProof = {
   worksBestWhen?: string[];
   failureCases?: string[];
 };
-
-export type CounterMatchup = {
-  targetHeroId: string;
-  counterHeroId: string;
-  reasons: string[];
-  counterTypes: string[];
-  proof?: CounterProof[];
-  patchVersion?: string;
-};
-
-export type CounterRule = {
-  id: string;
-  targetTag: string;
-  counterTag: string;
-  bonus: number;
-  reason: string;
-};

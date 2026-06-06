@@ -6,7 +6,7 @@ export default async function HomePage() {
   const t = await getTranslations('home')
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-dvh flex flex-col">
       <Navbar />
 
       <main className="flex-1 container mx-auto px-4 py-8">
