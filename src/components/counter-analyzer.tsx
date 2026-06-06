@@ -365,6 +365,10 @@ export function CounterAnalyzer() {
   }, [analysisState, animateScoresToFinal, counters])
 
   const detailRequestRef = useRef(0)
+  // Session-scoped cache of fetched AI details, keyed by target:counter:language.
+  // Lets a locale toggle reuse prose already fetched this session instead of
+  // re-calling analyze-detail. Cleared on reload so a fresh visit gets current data.
+  const detailCacheRef = useRef<Map<string, AnalyzeDetailResponse>>(new Map())
 
   const loadDetail = useCallback(
     async (counterId: string, detailLocale: string) => {
@@ -372,8 +376,18 @@ export function CounterAnalyzer() {
         return
       }
 
+      const cacheKey = `${selectedHero.id}:${counterId}:${detailLocale}`
       const requestId = detailRequestRef.current + 1
       detailRequestRef.current = requestId
+
+      const cached = detailCacheRef.current.get(cacheKey)
+      if (cached) {
+        setDetail(cached)
+        setDetailError(null)
+        setDetailState('ready')
+        return
+      }
+
       setDetailState('loading')
       setDetailError(null)
 
@@ -384,6 +398,7 @@ export function CounterAnalyzer() {
           return
         }
 
+        detailCacheRef.current.set(cacheKey, detailData)
         setDetail(detailData)
         setDetailState('ready')
       } catch (error) {
@@ -421,9 +436,8 @@ export function CounterAnalyzer() {
     initialLocaleRef.current = locale
 
     if (activeCounterId) {
-      // Intentional: refetch the open detail (with a loading state) in response
-      // to a locale change — synchronizing React state with the analyzer API.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      // Refetch (or serve from cache) the open detail in response to a locale
+      // change — synchronizing React state with the analyzer API.
       void loadDetail(activeCounterId, locale)
     }
   }, [locale, activeCounterId, loadDetail])
