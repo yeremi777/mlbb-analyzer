@@ -108,20 +108,6 @@ function getAnalyzerApiUrl(): string {
   return apiUrl.replace(/\/$/, "");
 }
 
-async function getErrorMessage(response: Response): Promise<string> {
-  try {
-    const data = (await response.json()) as Partial<AnalyzerApiError>;
-
-    if (data.error?.message) {
-      return data.error.message;
-    }
-
-    return JSON.stringify(data);
-  } catch {
-    return response.text();
-  }
-}
-
 function toUiHero(hero: DatasetHero): Hero {
   return {
     id: hero.uid,
@@ -137,9 +123,7 @@ export async function fetchHero(heroId: string): Promise<Hero> {
   const response = await fetch(`${getAnalyzerApiUrl()}/api/heroes/${encodeURIComponent(heroId)}`);
 
   if (!response.ok) {
-    const detail = await getErrorMessage(response);
-
-    throw new Error(`Failed to fetch hero ${heroId}: ${response.status}${detail ? ` ${detail}` : ""}`);
+    throw await toAnalyzerError(response);
   }
 
   return toUiHero((await response.json()) as DatasetHero);
@@ -149,9 +133,7 @@ export async function fetchHeroCounters(heroId: string): Promise<CounterHero[]> 
   const response = await fetch(`${getAnalyzerApiUrl()}/api/heroes/${encodeURIComponent(heroId)}/counters`);
 
   if (!response.ok) {
-    const detail = await getErrorMessage(response);
-
-    throw new Error(`Failed to fetch counters for ${heroId}: ${response.status}${detail ? ` ${detail}` : ""}`);
+    throw await toAnalyzerError(response);
   }
 
   const data = (await response.json()) as HeroCounterResponse[];
@@ -245,9 +227,7 @@ async function fetchHeroesPage(page: number, size: number): Promise<HeroesRespon
   const response = await fetch(url.toString());
 
   if (!response.ok) {
-    const detail = await getErrorMessage(response);
-
-    throw new Error(`Failed to fetch heroes: ${response.status}${detail ? ` ${detail}` : ""}`);
+    throw await toAnalyzerError(response);
   }
 
   const data = (await response.json()) as HeroesResponse;
