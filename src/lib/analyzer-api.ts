@@ -26,6 +26,45 @@ export type AnalyzerApiError = {
   };
 };
 
+/**
+ * Error thrown by the analyze endpoints. Carries the stable `error.code` (when
+ * the backend provides one) and the HTTP `status` so callers can map to
+ * localized copy via @/i18n/error-messages. `message` stays the raw English
+ * backend message and should not be shown to users directly.
+ */
+export class AnalyzerError extends Error {
+  code?: string;
+  status: number;
+
+  constructor(message: string, status: number, code?: string) {
+    super(message);
+    this.name = "AnalyzerError";
+    this.status = status;
+    this.code = code;
+  }
+}
+
+async function toAnalyzerError(response: Response): Promise<AnalyzerError> {
+  let code: string | undefined;
+  let message = response.statusText;
+
+  try {
+    const data = (await response.json()) as Partial<AnalyzerApiError>;
+
+    if (data.error?.code) {
+      code = data.error.code;
+    }
+
+    if (data.error?.message) {
+      message = data.error.message;
+    }
+  } catch {
+    // Non-JSON body — fall back to status text.
+  }
+
+  return new AnalyzerError(message, response.status, code);
+}
+
 export type AnalyzeScoresResponse = {
   targetHeroId: string;
   source: "ai";
@@ -148,7 +187,7 @@ export async function analyzeCounterScores(
   });
 
   if (!response.ok) {
-    throw new Error(await getErrorMessage(response));
+    throw await toAnalyzerError(response);
   }
 
   const data = (await response.json()) as AnalyzeScoresResponse;
@@ -175,7 +214,7 @@ export async function analyzeCounterDetail(
   });
 
   if (!response.ok) {
-    throw new Error(await getErrorMessage(response));
+    throw await toAnalyzerError(response);
   }
 
   return (await response.json()) as AnalyzeDetailResponse;

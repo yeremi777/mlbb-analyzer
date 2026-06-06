@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import type { CounterHero } from '@/lib/hero-data'
 import { HeroPortrait } from './hero-portrait'
@@ -54,13 +55,17 @@ export function CounterCard({
   selected = false,
   onClick,
 }: CounterCardProps) {
+  const tCard = useTranslations('counterCard')
+  const tRoles = useTranslations('roles')
+  const roleLabel = tRoles(counter.role.toLowerCase())
   const isTopThree = counter.rank <= 3
   const config = rankConfig[counter.rank as 1 | 2 | 3]
   const score = Math.round(displayScore ?? counter.score)
-  
+
   if (isTopThree && config) {
     const Icon = config.icon
     const isRankOne = counter.rank === 1
+    const rankLabel = isRankOne ? tCard('rank1Best') : config.label
 
     return (
       <div
@@ -86,7 +91,7 @@ export function CounterCard({
         <div className={cn('flex items-center gap-1 h-6', config.textClass)}>
           <Icon className="h-4 w-4" />
           <span className="text-xs font-bold uppercase tracking-wider">
-            {config.label}
+            {rankLabel}
           </span>
         </div>
 
@@ -109,7 +114,7 @@ export function CounterCard({
         </h3>
 
         {/* Role */}
-        <p className="text-xs text-muted-foreground">{counter.role}</p>
+        <p className="text-xs text-muted-foreground">{roleLabel}</p>
 
         <div className="mt-2 min-h-[38px]">
           <div className={cn('font-mono font-bold', isRankOne ? 'text-2xl' : 'text-xl', config.textClass)}>
@@ -117,7 +122,7 @@ export function CounterCard({
           </div>
           {typeof counter.confidence === 'number' && (
             <p className="text-[10px] text-muted-foreground">
-              {counter.confidence}% confidence
+              {tCard('confidence', { value: counter.confidence })}
             </p>
           )}
         </div>
@@ -174,12 +179,12 @@ export function CounterCard({
       </h4>
       
       {/* Role */}
-      <p className="text-[10px] text-muted-foreground">{counter.role}</p>
+      <p className="text-[10px] text-muted-foreground">{roleLabel}</p>
 
       <div className="mt-1 min-h-[28px]">
         <div className="font-mono text-base font-bold text-primary">{score}</div>
         {typeof counter.confidence === 'number' && (
-          <p className="text-[9px] text-muted-foreground">{counter.confidence}% conf.</p>
+          <p className="text-[9px] text-muted-foreground">{tCard('confidenceShort', { value: counter.confidence })}</p>
         )}
       </div>
       

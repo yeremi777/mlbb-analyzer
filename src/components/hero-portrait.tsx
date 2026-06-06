@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import type { Hero } from '@/lib/hero-data'
 
@@ -52,6 +53,7 @@ export function HeroPortrait({
   glow = false,
   glowColor = 'gold'
 }: HeroPortraitProps) {
+  const tRoles = useTranslations('roles')
   const initials = hero.name.slice(0, 2).toUpperCase()
   const bgColor = getHeroColor(hero.name)
   const imageSizes = {
@@ -104,7 +106,7 @@ export function HeroPortrait({
         </span>
       )}
       {showRole && (
-        <span className="text-xs text-muted-foreground">{hero.role}</span>
+        <span className="text-xs text-muted-foreground">{tRoles(hero.role.toLowerCase())}</span>
       )}
     </div>
   )

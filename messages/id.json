@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "title": "MLBB Analyzer",
+    "description": "Analisis kelemahan hero musuh dan temukan counter pick terkuat untuk Mobile Legends"
+  },
+  "nav": {
+    "brand": "MLBB Analyzer",
+    "counterAnalyzer": "Analisis Counter",
+    "draftSimulator": "Simulator Draft",
+    "heroDatabase": "Database Hero",
+    "tierList": "Tier List"
+  },
+  "home": {
+    "title": "Analisis Counter Hero",
+    "subtitle": "Analisis kelemahan hero musuh dan temukan counter pick terkuat.",
+    "footer": "MLBB Counter Analyzer tidak berafiliasi dengan Moonton"
+  },
+  "analyzer": {
+    "loadingHeroes": "Memuat Hero",
+    "selectEnemyHero": "Pilih Hero Musuh",
+    "fetchingHeroData": "Mengambil data hero dari analyzer API",
+    "clickToChoose": "Klik untuk memilih hero musuh yang akan dianalisis",
+    "enemyTargetLocked": "Target Musuh Terkunci",
+    "change": "Ubah",
+    "analyzingCounterPicks": "Menganalisis counter pick...",
+    "analyzerApiError": "Kesalahan Analyzer API",
+    "counterRecommendations": "Rekomendasi Counter",
+    "bestPicksAgainst": "Pick terbaik melawan {name}",
+    "otherStrongPicks": "Pick Kuat Lainnya",
+    "matchupTitle": "{counter} vs {target}",
+    "scoreLine": "Skor {score}",
+    "scoreWithConfidence": "Skor {score} / {confidence}% keyakinan",
+    "strengths": "Kelebihan",
+    "conditions": "Kondisi",
+    "failureCases": "Kasus Kegagalan",
+    "noCountersTitle": "Belum ada counter tersedia",
+    "noCountersBody": "Analyzer API belum mengembalikan matchup counter untuk {name}."
+  },
+  "counterCard": {
+    "rank1Best": "#1 TERBAIK",
+    "confidence": "{value}% keyakinan",
+    "confidenceShort": "{value}% keyak."
+  },
+  "heroSelector": {
+    "title": "Pilih Hero Musuh",
+    "searchPlaceholder": "Cari hero...",
+    "all": "Semua",
+    "noHeroesFound": "Hero tidak ditemukan"
+  },
+  "roles": {
+    "tank": "Tank",
+    "fighter": "Fighter",
+    "assassin": "Assassin",
+    "mage": "Mage",
+    "marksman": "Marksman",
+    "support": "Support"
+  },
+  "errors": {
+    "targetHeroNotFound": "Hero tidak ditemukan.",
+    "counterHeroNotFound": "Hero counter tidak ditemukan.",
+    "counterMatchupNotFound": "Tidak ada data matchup untuk pasangan ini.",
+    "counterDataNotFound": "Belum ada data counter untuk hero ini.",
+    "rateLimited": "Terlalu banyak permintaan. Mohon tunggu sebentar dan coba lagi.",
+    "unavailable": "AI tidak tersedia. Silakan coba lagi.",
+    "unknown": "Terjadi kesalahan. Silakan coba lagi."
+  },
+  "language": {
+    "label": "Bahasa",
+    "en": "EN",
+    "id": "ID"
+  }
+}

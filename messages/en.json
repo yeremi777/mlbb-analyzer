@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "title": "MLBB Analyzer",
+    "description": "Analyze enemy hero weaknesses and reveal the strongest counter picks for Mobile Legends"
+  },
+  "nav": {
+    "brand": "MLBB Analyzer",
+    "counterAnalyzer": "Counter Analyzer",
+    "draftSimulator": "Draft Simulator",
+    "heroDatabase": "Hero Database",
+    "tierList": "Tier List"
+  },
+  "home": {
+    "title": "Hero Counter Analyzer",
+    "subtitle": "Analyze enemy hero weaknesses and reveal the strongest counter picks.",
+    "footer": "MLBB Counter Analyzer is not affiliated with Moonton"
+  },
+  "analyzer": {
+    "loadingHeroes": "Loading Heroes",
+    "selectEnemyHero": "Select Enemy Hero",
+    "fetchingHeroData": "Fetching hero data from the analyzer API",
+    "clickToChoose": "Click to choose an enemy hero to analyze",
+    "enemyTargetLocked": "Enemy Target Locked",
+    "change": "Change",
+    "analyzingCounterPicks": "Analyzing counter picks...",
+    "analyzerApiError": "Analyzer API Error",
+    "counterRecommendations": "Counter Recommendations",
+    "bestPicksAgainst": "Best picks against {name}",
+    "otherStrongPicks": "Other Strong Picks",
+    "matchupTitle": "{counter} vs {target}",
+    "scoreLine": "Score {score}",
+    "scoreWithConfidence": "Score {score} / {confidence}% confidence",
+    "strengths": "Strengths",
+    "conditions": "Conditions",
+    "failureCases": "Failure Cases",
+    "noCountersTitle": "No counters available yet",
+    "noCountersBody": "The analyzer API returned no counter matchups for {name} yet."
+  },
+  "counterCard": {
+    "rank1Best": "#1 BEST",
+    "confidence": "{value}% confidence",
+    "confidenceShort": "{value}% conf."
+  },
+  "heroSelector": {
+    "title": "Select Enemy Hero",
+    "searchPlaceholder": "Search heroes...",
+    "all": "All",
+    "noHeroesFound": "No heroes found"
+  },
+  "roles": {
+    "tank": "Tank",
+    "fighter": "Fighter",
+    "assassin": "Assassin",
+    "mage": "Mage",
+    "marksman": "Marksman",
+    "support": "Support"
+  },
+  "errors": {
+    "targetHeroNotFound": "Hero not found.",
+    "counterHeroNotFound": "Counter hero not found.",
+    "counterMatchupNotFound": "No matchup data for this pair.",
+    "counterDataNotFound": "No counter data for this hero yet.",
+    "rateLimited": "Too many requests. Please wait a moment and try again.",
+    "unavailable": "AI is unavailable. Please try again.",
+    "unknown": "Something went wrong. Please try again."
+  },
+  "language": {
+    "label": "Language",
+    "en": "EN",
+    "id": "ID"
+  }
+}

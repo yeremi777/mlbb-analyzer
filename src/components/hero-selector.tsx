@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -17,6 +18,8 @@ interface HeroSelectorProps {
 }
 
 export function HeroSelector({ open, heroes, onOpenChange, onSelectHero }: HeroSelectorProps) {
+  const t = useTranslations('heroSelector')
+  const tRoles = useTranslations('roles')
   const [search, setSearch] = useState('')
   const [selectedRole, setSelectedRole] = useState<HeroRole | 'All'>('All')
   
@@ -40,15 +43,15 @@ export function HeroSelector({ open, heroes, onOpenChange, onSelectHero }: HeroS
       <DialogContent className="max-w-2xl bg-card border-border">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-foreground">
-            Select Enemy Hero
+            {t('title')}
           </DialogTitle>
         </DialogHeader>
-        
+
         {/* Search Input */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search heroes..."
+            placeholder={t('searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10 bg-muted border-border text-foreground placeholder:text-muted-foreground"
@@ -63,7 +66,7 @@ export function HeroSelector({ open, heroes, onOpenChange, onSelectHero }: HeroS
             onClick={() => setSelectedRole('All')}
             className={selectedRole === 'All' ? 'bg-primary text-primary-foreground' : ''}
           >
-            All
+            {t('all')}
           </Button>
           {HERO_ROLES.map(role => (
             <Button
@@ -73,7 +76,7 @@ export function HeroSelector({ open, heroes, onOpenChange, onSelectHero }: HeroS
               onClick={() => setSelectedRole(role)}
               className={selectedRole === role ? 'bg-primary text-primary-foreground' : ''}
             >
-              {role}
+              {tRoles(role.toLowerCase())}
             </Button>
           ))}
         </div>
@@ -100,7 +103,7 @@ export function HeroSelector({ open, heroes, onOpenChange, onSelectHero }: HeroS
           </div>
           {filteredHeroes.length === 0 && (
             <div className="flex items-center justify-center h-40 text-muted-foreground">
-              No heroes found
+              {t('noHeroesFound')}
             </div>
           )}
         </ScrollArea>

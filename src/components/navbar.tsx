@@ -1,17 +1,21 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Crosshair, Gamepad2, Database, BarChart3 } from 'lucide-react'
+import { LanguageToggle } from './language-toggle'
 
 const navItems = [
-  { label: 'Counter Analyzer', href: '/', icon: Crosshair, active: true },
-  { label: 'Draft Simulator', href: '#', icon: Gamepad2, disabled: true },
-  { label: 'Hero Database', href: '#', icon: Database, disabled: true },
-  { label: 'Tier List', href: '#', icon: BarChart3, disabled: true },
+  { key: 'counterAnalyzer', href: '/', icon: Crosshair, active: true },
+  { key: 'draftSimulator', href: '#', icon: Gamepad2, disabled: true },
+  { key: 'heroDatabase', href: '#', icon: Database, disabled: true },
+  { key: 'tierList', href: '#', icon: BarChart3, disabled: true },
 ]
 
 export function Navbar() {
+  const t = useTranslations('nav')
+
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
       <div className="container mx-auto px-4">
@@ -22,7 +26,7 @@ export function Navbar() {
               <Crosshair className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="font-bold text-lg text-foreground hidden sm:inline">
-              MLBB Analyzer
+              {t('brand')}
             </span>
           </Link>
 
@@ -32,7 +36,7 @@ export function Navbar() {
               const Icon = item.icon
               return (
                 <Link
-                  key={item.label}
+                  key={item.key}
                   href={item.href}
                   className={cn(
                     'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
@@ -42,11 +46,14 @@ export function Navbar() {
                   )}
                 >
                   <Icon className="w-4 h-4" />
-                  <span className="hidden md:inline">{item.label}</span>
+                  <span className="hidden md:inline">{t(item.key)}</span>
                 </Link>
               )
             })}
           </nav>
+
+          {/* Language Toggle */}
+          <LanguageToggle />
         </div>
       </div>
     </header>

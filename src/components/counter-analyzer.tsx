@@ -1,16 +1,19 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import type { Hero, CounterHero } from '@/lib/hero-data'
 import {
   analyzeCounterDetail,
   analyzeCounterScores,
+  AnalyzerError,
   fetchHero,
   fetchHeroCounters,
   fetchHeroes,
   type AnalyzeDetailResponse,
 } from '@/lib/analyzer-api'
+import { errorMessageKey } from '@/i18n/error-messages'
 import { HeroSelector } from './hero-selector'
 import { HeroPortrait } from './hero-portrait'
 import { CounterCard } from './counter-card'
@@ -22,15 +25,25 @@ type AnalysisState = 'idle' | 'analyzing' | 'revealing' | 'complete'
 type HeroesState = 'loading' | 'ready' | 'error'
 type DetailState = 'idle' | 'loading' | 'ready' | 'error'
 
-function getErrorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback
-}
-
 export function CounterAnalyzer() {
+  const t = useTranslations('analyzer')
+  const tErrors = useTranslations('errors')
+  const locale = useLocale()
+
+  const localizeError = useCallback(
+    (error: unknown): string => {
+      if (error instanceof AnalyzerError) {
+        return tErrors(errorMessageKey(error.code, error.status))
+      }
+
+      return tErrors('unknown')
+    },
+    [tErrors],
+  )
+
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [heroes, setHeroes] = useState<Hero[]>([])
   const [heroesState, setHeroesState] = useState<HeroesState>('loading')
-  const [heroesError, setHeroesError] = useState<string | null>(null)
   const [selectedHero, setSelectedHero] = useState<Hero | null>(null)
   const [counters, setCounters] = useState<CounterHero[]>([])
   const [analysisState, setAnalysisState] = useState<AnalysisState>('idle')
@@ -56,7 +69,6 @@ export function CounterAnalyzer() {
 
     async function loadHeroes() {
       setHeroesState('loading')
-      setHeroesError(null)
 
       try {
         const loadedHeroes = await fetchHeroes()
@@ -67,14 +79,13 @@ export function CounterAnalyzer() {
 
         setHeroes(loadedHeroes)
         setHeroesState('ready')
-      } catch (error) {
+      } catch {
         if (!active) {
           return
         }
 
         setHeroes([])
         setHeroesState('error')
-        setHeroesError(error instanceof Error ? error.message : 'Failed to load heroes')
       }
     }
 
@@ -240,7 +251,7 @@ export function CounterAnalyzer() {
       )
 
       try {
-        const scoreData = await analyzeCounterScores(targetHero.id)
+        const scoreData = await analyzeCounterScores(targetHero.id, locale)
 
         if (!isActiveRequest()) {
           return
@@ -290,7 +301,7 @@ export function CounterAnalyzer() {
 
         stopScoreTicker()
         stopFinalScoreAnimation()
-        setAnalysisError(getErrorMessage(error, 'Failed to analyze counter scores'))
+        setAnalysisError(localizeError(error))
         setDisplayScores(
           Object.fromEntries(counterData.map((counter) => [counter.id, 0])),
         )
@@ -303,7 +314,7 @@ export function CounterAnalyzer() {
       }
 
       setCounters([])
-      setAnalysisError(getErrorMessage(error, 'Failed to load counter matchups'))
+      setAnalysisError(localizeError(error))
       setScoresReady(false)
       setAnalysisState('complete')
     }
@@ -353,26 +364,69 @@ export function CounterAnalyzer() {
     }
   }, [analysisState, animateScoresToFinal, counters])
 
-  const handleOpenCounter = async (counter: CounterHero) => {
+  const detailRequestRef = useRef(0)
+
+  const loadDetail = useCallback(
+    async (counterId: string, detailLocale: string) => {
+      if (!selectedHero) {
+        return
+      }
+
+      const requestId = detailRequestRef.current + 1
+      detailRequestRef.current = requestId
+      setDetailState('loading')
+      setDetailError(null)
+
+      try {
+        const detailData = await analyzeCounterDetail(selectedHero.id, counterId, detailLocale)
+
+        if (detailRequestRef.current !== requestId) {
+          return
+        }
+
+        setDetail(detailData)
+        setDetailState('ready')
+      } catch (error) {
+        if (detailRequestRef.current !== requestId) {
+          return
+        }
+
+        setDetailState('error')
+        setDetailError(localizeError(error))
+      }
+    },
+    [selectedHero, localizeError],
+  )
+
+  const handleOpenCounter = (counter: CounterHero) => {
     if (!selectedHero) {
       return
     }
 
     pendingDetailFocusRef.current = counter.id
     setActiveCounterId(counter.id)
-    setDetailState('loading')
     setDetail(null)
-    setDetailError(null)
-
-    try {
-      const detailData = await analyzeCounterDetail(selectedHero.id, counter.id)
-      setDetail(detailData)
-      setDetailState('ready')
-    } catch (error) {
-      setDetailState('error')
-      setDetailError(getErrorMessage(error, 'Failed to analyze counter detail'))
-    }
+    void loadDetail(counter.id, locale)
   }
+
+  // Re-fetch the open detail when the locale changes so its AI prose comes back
+  // in the new language. Skips the initial mount (no flip yet); when no detail
+  // is open (`activeCounterId` null) there is nothing to refetch. The score
+  // reveal carries no prose, so it is intentionally left untouched.
+  const initialLocaleRef = useRef(locale)
+  useEffect(() => {
+    if (locale === initialLocaleRef.current) {
+      return
+    }
+    initialLocaleRef.current = locale
+
+    if (activeCounterId) {
+      // Intentional: refetch the open detail (with a loading state) in response
+      // to a locale change — synchronizing React state with the analyzer API.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      void loadDetail(activeCounterId, locale)
+    }
+  }, [locale, activeCounterId, loadDetail])
 
   // Get counters by rank
   const rank1 = counters.find(c => c.rank === 1)
@@ -409,14 +463,14 @@ export function CounterAnalyzer() {
           </div>
           <div className="text-center">
             <h3 className="font-semibold text-foreground mb-1">
-              {heroesState === 'loading' ? 'Loading Heroes' : 'Select Enemy Hero'}
+              {heroesState === 'loading' ? t('loadingHeroes') : t('selectEnemyHero')}
             </h3>
             <p className="text-sm text-muted-foreground">
               {heroesState === 'error'
-                ? heroesError ?? 'Analyzer API is unavailable'
+                ? tErrors('unavailable')
                 : heroesState === 'loading'
-                  ? 'Fetching hero data from the analyzer API'
-                  : 'Click to choose an enemy hero to analyze'}
+                  ? t('fetchingHeroData')
+                  : t('clickToChoose')}
             </p>
           </div>
         </Card>
@@ -431,14 +485,14 @@ export function CounterAnalyzer() {
               className="text-muted-foreground hover:text-foreground"
             >
               <Search className="w-4 h-4 mr-1" />
-              Change
+              {t('change')}
             </Button>
           </div>
-          
+
           <div className="flex flex-col items-center gap-3">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-destructive">
               <Crosshair className="w-3.5 h-3.5" />
-              Enemy Target Locked
+              {t('enemyTargetLocked')}
             </div>
             
             <HeroPortrait
@@ -457,13 +511,13 @@ export function CounterAnalyzer() {
       {analysisState === 'analyzing' && (
         <div className="flex flex-col items-center gap-3 py-8">
           <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          <p className="text-sm text-muted-foreground">Analyzing counter picks...</p>
+          <p className="text-sm text-muted-foreground">{t('analyzingCounterPicks')}</p>
         </div>
       )}
 
       {analysisError && (
         <Card className="w-full max-w-2xl border-destructive/40 bg-destructive/10 p-4 text-center">
-          <h2 className="text-sm font-bold text-destructive">Analyzer API Error</h2>
+          <h2 className="text-sm font-bold text-destructive">{t('analyzerApiError')}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{analysisError}</p>
         </Card>
       )}
@@ -477,9 +531,9 @@ export function CounterAnalyzer() {
         >
           {/* Section Header */}
           <div className="text-center mb-2">
-            <h2 className="text-lg font-bold text-foreground mb-1">Counter Recommendations</h2>
+            <h2 className="text-lg font-bold text-foreground mb-1">{t('counterRecommendations')}</h2>
             <p className="text-sm text-muted-foreground pb-1">
-              Best picks against {selectedHero?.name}
+              {t('bestPicksAgainst', { name: selectedHero?.name ?? '' })}
             </p>
           </div>
 
@@ -552,7 +606,7 @@ export function CounterAnalyzer() {
               revealedRanks.includes(4) ? 'opacity-100' : 'opacity-0 pointer-events-none'
             )}>
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider text-center">
-                Other Strong Picks
+                {t('otherStrongPicks')}
               </h3>
               <div className="flex justify-center gap-8 sm:gap-12">
                 {remainingCounters.map(counter => (
@@ -580,11 +634,17 @@ export function CounterAnalyzer() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h3 id="counter-analysis-title" className="text-base font-bold text-foreground">
-                    {activeCounter.name} vs {selectedHero?.name}
+                    {t('matchupTitle', { counter: activeCounter.name, target: selectedHero?.name ?? '' })}
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Score {Math.round(displayScores[activeCounter.id] ?? activeCounter.score)}
-                    {typeof activeCounter.confidence === 'number' && ` / ${activeCounter.confidence}% confidence`}
+                    {typeof activeCounter.confidence === 'number'
+                      ? t('scoreWithConfidence', {
+                          score: Math.round(displayScores[activeCounter.id] ?? activeCounter.score),
+                          confidence: activeCounter.confidence,
+                        })
+                      : t('scoreLine', {
+                          score: Math.round(displayScores[activeCounter.id] ?? activeCounter.score),
+                        })}
                   </p>
                 </div>
                 {detailState === 'loading' && (
@@ -602,9 +662,9 @@ export function CounterAnalyzer() {
                 <div className="mt-4 space-y-4">
                   <p className="text-sm leading-6 text-foreground">{detail.summary}</p>
 
-                  <DetailList title="Strengths" items={detail.strengths} />
-                  <DetailList title="Conditions" items={detail.conditions} />
-                  <DetailList title="Failure Cases" items={detail.failureCases} />
+                  <DetailList title={t('strengths')} items={detail.strengths} />
+                  <DetailList title={t('conditions')} items={detail.conditions} />
+                  <DetailList title={t('failureCases')} items={detail.failureCases} />
                 </div>
               )}
             </Card>
@@ -614,9 +674,9 @@ export function CounterAnalyzer() {
 
       {analysisState === 'complete' && selectedHero && counters.length === 0 && (
         <Card className="w-full max-w-md border-border bg-card p-6 text-center">
-          <h2 className="text-base font-bold text-foreground">No counters available yet</h2>
+          <h2 className="text-base font-bold text-foreground">{t('noCountersTitle')}</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            The analyzer API returned no counter matchups for {selectedHero.name} yet.
+            {t('noCountersBody', { name: selectedHero.name })}
           </p>
         </Card>
       )}
