@@ -19,6 +19,14 @@ export interface CounterHero extends Hero {
   confidence?: number;
 }
 
+export interface SynergyHero extends Hero {
+  rank: number;
+  reason: string;
+  tags: string[];
+  score: number;
+  confidence?: number;
+}
+
 export const HERO_ROLES: HeroRole[] = [
   "Tank",
   "Fighter",

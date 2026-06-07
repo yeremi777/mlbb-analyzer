@@ -6,6 +6,7 @@
   "nav": {
     "brand": "MLBB Analyzer",
     "counterAnalyzer": "Analisis Counter",
+    "synergyAnalyzer": "Analisis Sinergi",
     "draftSimulator": "Simulator Draft",
     "heroDatabase": "Database Hero",
     "tierList": "Tier List"
@@ -14,6 +15,11 @@
     "title": "Analisis Counter Hero",
     "subtitle": "Analisis kelemahan hero musuh dan temukan counter pick terkuat.",
     "footer": "MLBB Counter Analyzer tidak berafiliasi dengan Moonton"
+  },
+  "synergies": {
+    "title": "Analisis Sinergi Hero",
+    "subtitle": "Temukan hero rekan yang bisa mengaktifkan, melindungi, dan membuat kombo kuat dengan anchor pick.",
+    "footer": "MLBB Synergy Analyzer tidak berafiliasi dengan Moonton"
   },
   "analyzer": {
     "loadingHeroes": "Memuat Hero",
@@ -36,6 +42,30 @@
     "noCountersTitle": "Belum ada counter tersedia",
     "noCountersBody": "Analyzer API belum mengembalikan matchup counter untuk {name}."
   },
+  "synergyAnalyzer": {
+    "loadingHeroes": "Memuat Hero",
+    "selectAnchorHero": "Pilih Hero Anchor",
+    "selectorTitle": "Pilih Hero Anchor",
+    "searchPlaceholder": "Cari hero...",
+    "noHeroesFound": "Hero tidak ditemukan",
+    "fetchingHeroData": "Mengambil data hero dari analyzer API",
+    "clickToChoose": "Klik untuk memilih hero dan menemukan rekan terkuat",
+    "anchorHeroLocked": "Hero Anchor Terkunci",
+    "change": "Ubah",
+    "analyzingSynergyPicks": "Menganalisis pick sinergi...",
+    "analyzerApiError": "Kesalahan Analyzer API",
+    "synergyRecommendations": "Rekomendasi Sinergi",
+    "bestAlliesWith": "Rekan terbaik dengan {name}",
+    "otherSynergyPicks": "Pick Sinergi Lainnya",
+    "matchupTitle": "{anchor} + {synergy}",
+    "scoreLine": "Skor {score}",
+    "scoreWithConfidence": "Skor {score} / {confidence}% keyakinan",
+    "strengths": "Kelebihan",
+    "conditions": "Kondisi",
+    "failureCases": "Kasus Kegagalan",
+    "noSynergiesTitle": "Belum ada sinergi tersedia",
+    "noSynergiesBody": "Analyzer API belum memiliki matchup sinergi terkurasi untuk {name}."
+  },
   "counterCard": {
     "rank1Best": "#1 TERBAIK",
     "confidence": "{value}% keyakinan",
@@ -56,10 +86,15 @@
     "support": "Support"
   },
   "errors": {
+    "heroNotFound": "Hero tidak ditemukan.",
     "targetHeroNotFound": "Hero tidak ditemukan.",
     "counterHeroNotFound": "Hero counter tidak ditemukan.",
     "counterMatchupNotFound": "Tidak ada data matchup untuk pasangan ini.",
     "counterDataNotFound": "Belum ada data counter untuk hero ini.",
+    "anchorHeroNotFound": "Hero anchor tidak ditemukan.",
+    "synergyHeroNotFound": "Hero sinergi tidak ditemukan.",
+    "synergyMatchupNotFound": "Tidak ada data sinergi untuk pasangan ini.",
+    "synergyDataNotFound": "Belum ada data sinergi untuk hero ini.",
     "rateLimited": "Terlalu banyak permintaan. Mohon tunggu sebentar dan coba lagi.",
     "unavailable": "AI tidak tersedia. Silakan coba lagi.",
     "unknown": "Terjadi kesalahan. Silakan coba lagi."

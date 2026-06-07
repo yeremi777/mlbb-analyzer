@@ -27,6 +27,13 @@
 - Add top 3 counter reveal.
 - Add ranked counter list.
 
+## Navigation Direction
+
+- Keep `/` as the counter analyzer during the early MVP.
+- Later, turn `/` into a simple project landing and feature hub with friendly entry points.
+- Move major tools to dedicated routes such as `/counters`, `/synergies`, `/draft`, and future analyzer sections.
+- Keep each feature route focused on the actual tool experience, not marketing copy.
+
 ## Phase 3 - Dataset Tooling
 
 - Validation script.

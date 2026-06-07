@@ -6,6 +6,7 @@
   "nav": {
     "brand": "MLBB Analyzer",
     "counterAnalyzer": "Counter Analyzer",
+    "synergyAnalyzer": "Synergy Analyzer",
     "draftSimulator": "Draft Simulator",
     "heroDatabase": "Hero Database",
     "tierList": "Tier List"
@@ -14,6 +15,11 @@
     "title": "Hero Counter Analyzer",
     "subtitle": "Analyze enemy hero weaknesses and reveal the strongest counter picks.",
     "footer": "MLBB Counter Analyzer is not affiliated with Moonton"
+  },
+  "synergies": {
+    "title": "Hero Synergy Analyzer",
+    "subtitle": "Find ally heroes that enable, protect, and combo well with your anchor pick.",
+    "footer": "MLBB Synergy Analyzer is not affiliated with Moonton"
   },
   "analyzer": {
     "loadingHeroes": "Loading Heroes",
@@ -36,6 +42,30 @@
     "noCountersTitle": "No counters available yet",
     "noCountersBody": "The analyzer API returned no counter matchups for {name} yet."
   },
+  "synergyAnalyzer": {
+    "loadingHeroes": "Loading Heroes",
+    "selectAnchorHero": "Select Anchor Hero",
+    "selectorTitle": "Select Anchor Hero",
+    "searchPlaceholder": "Search heroes...",
+    "noHeroesFound": "No heroes found",
+    "fetchingHeroData": "Fetching hero data from the analyzer API",
+    "clickToChoose": "Click to choose a hero and find strong allies",
+    "anchorHeroLocked": "Anchor Hero Locked",
+    "change": "Change",
+    "analyzingSynergyPicks": "Analyzing synergy picks...",
+    "analyzerApiError": "Analyzer API Error",
+    "synergyRecommendations": "Synergy Recommendations",
+    "bestAlliesWith": "Best allies with {name}",
+    "otherSynergyPicks": "Other Synergy Picks",
+    "matchupTitle": "{anchor} + {synergy}",
+    "scoreLine": "Score {score}",
+    "scoreWithConfidence": "Score {score} / {confidence}% confidence",
+    "strengths": "Strengths",
+    "conditions": "Conditions",
+    "failureCases": "Failure Cases",
+    "noSynergiesTitle": "No synergies available yet",
+    "noSynergiesBody": "The analyzer API has no curated synergy matchups for {name} yet."
+  },
   "counterCard": {
     "rank1Best": "#1 BEST",
     "confidence": "{value}% confidence",
@@ -56,10 +86,15 @@
     "support": "Support"
   },
   "errors": {
+    "heroNotFound": "Hero not found.",
     "targetHeroNotFound": "Hero not found.",
     "counterHeroNotFound": "Counter hero not found.",
     "counterMatchupNotFound": "No matchup data for this pair.",
     "counterDataNotFound": "No counter data for this hero yet.",
+    "anchorHeroNotFound": "Anchor hero not found.",
+    "synergyHeroNotFound": "Synergy hero not found.",
+    "synergyMatchupNotFound": "No synergy data for this pair.",
+    "synergyDataNotFound": "No synergy data for this hero yet.",
     "rateLimited": "Too many requests. Please wait a moment and try again.",
     "unavailable": "AI is unavailable. Please try again.",
     "unknown": "Something went wrong. Please try again."

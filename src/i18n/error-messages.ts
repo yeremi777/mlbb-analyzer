@@ -7,10 +7,15 @@
 
 /** Stable `error.code` strings → `errors.<key>`. */
 const CODE_TO_KEY: Record<string, string> = {
+  hero_not_found: "heroNotFound",
   target_hero_not_found: "targetHeroNotFound",
   counter_hero_not_found: "counterHeroNotFound",
   counter_matchup_not_found: "counterMatchupNotFound",
   counter_data_not_found: "counterDataNotFound",
+  anchor_hero_not_found: "anchorHeroNotFound",
+  synergy_hero_not_found: "synergyHeroNotFound",
+  synergy_matchup_not_found: "synergyMatchupNotFound",
+  synergy_data_not_found: "synergyDataNotFound",
 };
 
 /** HTTP statuses without a stable `code` → `errors.<key>`. */

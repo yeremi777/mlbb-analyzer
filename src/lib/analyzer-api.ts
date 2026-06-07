@@ -1,6 +1,7 @@
 import type { Hero as DatasetHero, HeroRole as DatasetHeroRole } from "@/types/hero";
-import type { CounterHero, Hero } from "@/lib/hero-data";
+import type { CounterHero, Hero, SynergyHero } from "@/lib/hero-data";
 import type { CounterProof } from "@/types/counter";
+import type { SynergyProof } from "@/types/synergy";
 
 type HeroesResponse = {
   items: DatasetHero[];
@@ -17,6 +18,14 @@ type HeroCounterResponse = {
   counterTypes: string[];
   proof?: CounterProof[];
   patchVersion?: string;
+};
+
+type HeroSynergyResponse = {
+  anchorHeroId: string;
+  synergyHero: DatasetHero;
+  reasons: string[];
+  synergyTypes: string[];
+  proof?: SynergyProof[];
 };
 
 export type AnalyzerApiError = {
@@ -79,6 +88,30 @@ export type AnalyzeScoresResponse = {
 export type AnalyzeDetailResponse = {
   targetHeroId: string;
   counterHeroId: string;
+  source: "ai";
+  score: number;
+  confidence: number;
+  summary: string;
+  strengths: string[];
+  conditions: string[];
+  failureCases: string[];
+  evidenceIds: string[];
+};
+
+export type AnalyzeSynergyScoresResponse = {
+  anchorHeroId: string;
+  source: "ai";
+  recommendations: Array<{
+    rank: number;
+    synergyHeroId: string;
+    score: number;
+    confidence: number;
+  }>;
+};
+
+export type AnalyzeSynergyDetailResponse = {
+  anchorHeroId: string;
+  synergyHeroId: string;
   source: "ai";
   score: number;
   confidence: number;
@@ -155,6 +188,32 @@ export async function fetchHeroCounters(heroId: string): Promise<CounterHero[]> 
   });
 }
 
+export async function fetchHeroSynergies(heroId: string): Promise<SynergyHero[]> {
+  const response = await fetch(`${getAnalyzerApiUrl()}/api/heroes/${encodeURIComponent(heroId)}/synergies`);
+
+  if (!response.ok) {
+    throw await toAnalyzerError(response);
+  }
+
+  const data = (await response.json()) as HeroSynergyResponse[];
+
+  if (!Array.isArray(data)) {
+    throw new Error("Invalid hero synergies response: expected an array");
+  }
+
+  return data.map((matchup, index) => {
+    const synergyHero = toUiHero(matchup.synergyHero);
+
+    return {
+      ...synergyHero,
+      rank: index + 1,
+      reason: matchup.reasons[0] ?? "",
+      tags: matchup.synergyTypes,
+      score: 0,
+    };
+  });
+}
+
 export async function analyzeCounterScores(
   targetHeroId: string,
   language = "en",
@@ -200,6 +259,53 @@ export async function analyzeCounterDetail(
   }
 
   return (await response.json()) as AnalyzeDetailResponse;
+}
+
+export async function analyzeSynergyScores(
+  anchorHeroId: string,
+  language = "en",
+): Promise<AnalyzeSynergyScoresResponse> {
+  const response = await fetch(`${getAnalyzerApiUrl()}/api/synergies/analyze-score`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ anchorHeroId, language }),
+  });
+
+  if (!response.ok) {
+    throw await toAnalyzerError(response);
+  }
+
+  const data = (await response.json()) as AnalyzeSynergyScoresResponse;
+
+  if (!Array.isArray(data.recommendations)) {
+    throw new Error("Invalid analyze synergy score response: recommendations must be an array");
+  }
+
+  return data;
+}
+
+export async function analyzeSynergyDetail(
+  anchorHeroId: string,
+  synergyHeroId: string,
+  language = "en",
+): Promise<AnalyzeSynergyDetailResponse> {
+  const response = await fetch(`${getAnalyzerApiUrl()}/api/synergies/analyze-detail`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ anchorHeroId, synergyHeroId, language }),
+  });
+
+  if (!response.ok) {
+    throw await toAnalyzerError(response);
+  }
+
+  return (await response.json()) as AnalyzeSynergyDetailResponse;
 }
 
 export async function fetchHeroes(): Promise<Hero[]> {
