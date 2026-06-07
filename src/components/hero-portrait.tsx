@@ -12,7 +12,7 @@ interface HeroPortraitProps {
   showName?: boolean
   showRole?: boolean
   glow?: boolean
-  glowColor?: 'gold' | 'silver' | 'bronze'
+  glowColor?: 'gold' | 'silver' | 'bronze' | 'red' | 'green'
 }
 
 const sizeClasses = {
@@ -26,6 +26,8 @@ const glowClasses = {
   gold: 'ring-2 ring-primary shadow-[0_0_20px_var(--glow-gold)]',
   silver: 'ring-2 ring-silver shadow-[0_0_15px_rgba(180,180,180,0.3)]',
   bronze: 'ring-2 ring-bronze shadow-[0_0_12px_rgba(205,127,50,0.3)]',
+  red: 'ring-2 ring-destructive shadow-[0_0_16px_rgba(220,60,40,0.35)]',
+  green: 'ring-2 ring-emerald-400 shadow-[0_0_16px_rgba(52,211,153,0.35)]',
 }
 
 // Generate a consistent color based on hero name for the placeholder

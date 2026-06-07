@@ -529,7 +529,7 @@ export function CounterAnalyzer() {
               showName
               showRole
               glow
-              glowColor="bronze"
+              glowColor="red"
             />
           </div>
         </Card>

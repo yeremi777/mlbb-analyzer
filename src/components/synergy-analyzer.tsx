@@ -503,7 +503,7 @@ export function SynergyAnalyzer() {
           </div>
 
           <div className="flex flex-col items-center gap-3">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
               <Users className="w-3.5 h-3.5" />
               {t('anchorHeroLocked')}
             </div>
@@ -514,7 +514,7 @@ export function SynergyAnalyzer() {
               showName
               showRole
               glow
-              glowColor="gold"
+              glowColor="green"
             />
           </div>
         </Card>

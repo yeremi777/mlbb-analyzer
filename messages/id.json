@@ -50,7 +50,7 @@
     "noHeroesFound": "Hero tidak ditemukan",
     "fetchingHeroData": "Mengambil data hero dari analyzer API",
     "clickToChoose": "Klik untuk memilih hero dan menemukan rekan terkuat",
-    "anchorHeroLocked": "Hero Anchor Terkunci",
+    "anchorHeroLocked": "Anchor Tim Terkunci",
     "change": "Ubah",
     "analyzingSynergyPicks": "Menganalisis pick sinergi...",
     "analyzerApiError": "Kesalahan Analyzer API",

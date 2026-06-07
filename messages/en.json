@@ -50,7 +50,7 @@
     "noHeroesFound": "No heroes found",
     "fetchingHeroData": "Fetching hero data from the analyzer API",
     "clickToChoose": "Click to choose a hero and find strong allies",
-    "anchorHeroLocked": "Anchor Hero Locked",
+    "anchorHeroLocked": "Ally Anchor Locked",
     "change": "Change",
     "analyzingSynergyPicks": "Analyzing synergy picks...",
     "analyzerApiError": "Analyzer API Error",
