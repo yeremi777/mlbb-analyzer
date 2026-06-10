@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "MLBB Analyzer",
-    "description": "Analyze enemy hero weaknesses and reveal the strongest counter picks for Mobile Legends"
+    "description": "Browser-based Mobile Legends draft helper for counters, synergies, and pick planning"
   },
   "nav": {
     "brand": "MLBB Analyzer",
@@ -11,7 +11,81 @@
     "heroDatabase": "Hero Database",
     "tierList": "Tier List"
   },
-  "home": {
+  "landing": {
+    "eyebrow": "Plan better picks before the match starts",
+    "hero": {
+      "titleLead": "Plan better MLBB picks",
+      "titleAccent": "before the match starts",
+      "subtitle": "MLBB Analyzer is a browser-based draft helper for Mobile Legends: Bang Bang. Find counter options for enemy heroes, explore ally combinations that fit your team, and build clearer draft intuition.",
+      "primaryCta": "Try Counter Analyzer",
+      "secondaryCta": "Explore Synergies"
+    },
+    "features": {
+      "title": "What you can do now",
+      "subtitle": "Two core draft tools to help you prepare before the match.",
+      "counter": {
+        "title": "Counter Analyzer",
+        "body": "Select an enemy hero and review recommended counter picks. Compare options and decide what works best for your team.",
+        "cta": "Open tool"
+      },
+      "synergy": {
+        "title": "Synergy Analyzer",
+        "body": "Select an anchor hero and find ally picks that complement its strengths. Build clearer team composition ideas.",
+        "cta": "Open tool"
+      },
+      "draft": {
+        "title": "Draft Planning Direction",
+        "body": "More draft tools are planned as the project grows, including broader draft guidance and role recommendations.",
+        "cta": "Learn more"
+      }
+    },
+    "benefits": {
+      "title": "How it helps",
+      "subtitle": "Practical benefits for your draft preparation.",
+      "threats": {
+        "title": "Understand enemy threats",
+        "body": "Focus on the selected enemy threat and compare ways to respond."
+      },
+      "saferPicks": {
+        "title": "Compare safer picks",
+        "body": "Review ranked counter options and choose what fits your team and playstyle."
+      },
+      "composition": {
+        "title": "Think about team composition",
+        "body": "Explore ally combinations that work together so your draft has a clearer direction."
+      },
+      "decisions": {
+        "title": "Prepare for draft decisions",
+        "body": "Go into draft with a plan instead of reacting to every pick on the fly."
+      }
+    },
+    "roadmap": {
+      "title": "Future direction",
+      "subtitle": "More draft tools are planned as the project grows.",
+      "draft": {
+        "title": "Full draft analysis",
+        "body": "Multi-pick reasoning that considers the whole enemy composition, not just one hero."
+      },
+      "roles": {
+        "title": "Role / lane recommendations",
+        "body": "Suggestions tied to lane matchups and team role balance."
+      },
+      "items": {
+        "title": "Item / emblem suggestions",
+        "body": "Contextual build paths based on draft state and enemy threats."
+      },
+      "patch": {
+        "title": "Patch / meta notes",
+        "body": "Readable summaries of patch changes that affect draft priorities."
+      },
+      "explanations": {
+        "title": "Readable explanations",
+        "body": "Natural-language reasoning to help you understand why a pick is recommended."
+      }
+    },
+    "footer": "MLBB Analyzer is not affiliated with Moonton"
+  },
+  "counter": {
     "title": "Hero Counter Analyzer",
     "subtitle": "Analyze enemy hero weaknesses and reveal the strongest counter picks.",
     "footer": "MLBB Counter Analyzer is not affiliated with Moonton"

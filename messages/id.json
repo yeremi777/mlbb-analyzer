@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "MLBB Analyzer",
-    "description": "Analisis kelemahan hero musuh dan temukan counter pick terkuat untuk Mobile Legends"
+    "description": "Draft helper Mobile Legends berbasis browser untuk counter, sinergi, dan perencanaan pick"
   },
   "nav": {
     "brand": "MLBB Analyzer",
@@ -11,7 +11,81 @@
     "heroDatabase": "Database Hero",
     "tierList": "Tier List"
   },
-  "home": {
+  "landing": {
+    "eyebrow": "Rencanakan pick lebih baik sebelum match dimulai",
+    "hero": {
+      "titleLead": "Rencanakan pick MLBB",
+      "titleAccent": "sebelum match dimulai",
+      "subtitle": "MLBB Analyzer adalah draft helper berbasis browser untuk Mobile Legends: Bang Bang. Temukan opsi counter untuk hero musuh, jelajahi kombinasi rekan yang cocok dengan tim, dan bangun intuisi draft yang lebih jelas.",
+      "primaryCta": "Coba Analisis Counter",
+      "secondaryCta": "Jelajahi Sinergi"
+    },
+    "features": {
+      "title": "Yang bisa dilakukan sekarang",
+      "subtitle": "Dua tool draft utama untuk membantu persiapan sebelum match.",
+      "counter": {
+        "title": "Analisis Counter",
+        "body": "Pilih hero musuh dan lihat rekomendasi counter. Bandingkan opsi lalu tentukan yang paling cocok untuk timmu.",
+        "cta": "Buka tool"
+      },
+      "synergy": {
+        "title": "Analisis Sinergi",
+        "body": "Pilih hero anchor dan temukan rekan yang melengkapi kekuatannya. Bangun ide komposisi tim yang lebih jelas.",
+        "cta": "Buka tool"
+      },
+      "draft": {
+        "title": "Arah Perencanaan Draft",
+        "body": "Tool draft lain direncanakan seiring proyek berkembang, termasuk panduan draft yang lebih luas dan rekomendasi role.",
+        "cta": "Pelajari"
+      }
+    },
+    "benefits": {
+      "title": "Manfaatnya",
+      "subtitle": "Dukungan praktis untuk persiapan draft.",
+      "threats": {
+        "title": "Pahami ancaman musuh",
+        "body": "Fokus pada ancaman musuh yang dipilih dan bandingkan cara meresponsnya."
+      },
+      "saferPicks": {
+        "title": "Bandingkan pick yang lebih aman",
+        "body": "Lihat opsi counter berperingkat dan pilih yang cocok dengan tim serta gaya mainmu."
+      },
+      "composition": {
+        "title": "Pikirkan komposisi tim",
+        "body": "Jelajahi kombinasi rekan yang saling mendukung agar draft punya arah yang lebih jelas."
+      },
+      "decisions": {
+        "title": "Siap mengambil keputusan draft",
+        "body": "Masuk ke draft dengan rencana, bukan hanya bereaksi pada setiap pick lawan."
+      }
+    },
+    "roadmap": {
+      "title": "Arah berikutnya",
+      "subtitle": "Tool draft lain direncanakan seiring proyek berkembang.",
+      "draft": {
+        "title": "Analisis draft penuh",
+        "body": "Penalaran multi-pick yang mempertimbangkan komposisi musuh secara keseluruhan, bukan hanya satu hero."
+      },
+      "roles": {
+        "title": "Rekomendasi role / lane",
+        "body": "Saran yang terkait dengan matchup lane dan keseimbangan role tim."
+      },
+      "items": {
+        "title": "Saran item / emblem",
+        "body": "Arah build yang kontekstual berdasarkan kondisi draft dan ancaman musuh."
+      },
+      "patch": {
+        "title": "Catatan patch / meta",
+        "body": "Ringkasan perubahan patch yang mudah dibaca dan memengaruhi prioritas draft."
+      },
+      "explanations": {
+        "title": "Penjelasan yang mudah dibaca",
+        "body": "Alasan dalam bahasa natural untuk membantu memahami kenapa sebuah pick direkomendasikan."
+      }
+    },
+    "footer": "MLBB Analyzer tidak berafiliasi dengan Moonton"
+  },
+  "counter": {
     "title": "Analisis Counter Hero",
     "subtitle": "Analisis kelemahan hero musuh dan temukan counter pick terkuat.",
     "footer": "MLBB Counter Analyzer tidak berafiliasi dengan Moonton"

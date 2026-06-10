@@ -29,9 +29,10 @@
 
 ## Navigation Direction
 
-- Keep `/` as the counter analyzer during the early MVP.
-- Later, turn `/` into a simple project landing and feature hub with friendly entry points.
-- Move major tools to dedicated routes such as `/counters`, `/synergies`, `/draft`, and future analyzer sections.
+- Keep `/` as the project landing and feature hub with friendly entry points.
+- Keep the counter analyzer at `/counters`.
+- Keep the synergy analyzer at `/synergies`.
+- Move future major tools to dedicated routes such as `/draft` and future analyzer sections.
 - Keep each feature route focused on the actual tool experience, not marketing copy.
 
 ## Phase 3 - Dataset Tooling

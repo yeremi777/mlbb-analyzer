@@ -4,11 +4,11 @@ import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Crosshair, Handshake, Gamepad2, Database, BarChart3 } from 'lucide-react'
+import { Crosshair, Handshake, Gamepad2, Database, BarChart3, Swords } from 'lucide-react'
 import { LanguageToggle } from './language-toggle'
 
 const navItems = [
-  { key: 'counterAnalyzer', href: '/', icon: Crosshair },
+  { key: 'counterAnalyzer', href: '/counters', icon: Crosshair },
   { key: 'synergyAnalyzer', href: '/synergies', icon: Handshake },
   { key: 'draftSimulator', href: '#', icon: Gamepad2, disabled: true },
   { key: 'heroDatabase', href: '#', icon: Database, disabled: true },
@@ -26,7 +26,7 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary">
-              <Crosshair className="w-5 h-5 text-primary-foreground" />
+              <Swords className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="font-bold text-lg text-foreground hidden sm:inline">
               {t('brand')}
@@ -37,9 +37,7 @@ export function Navbar() {
           <nav className="flex items-center gap-1">
             {navItems.map(item => {
               const Icon = item.icon
-              const active = item.href === '/'
-                ? pathname === '/'
-                : item.href !== '#' && pathname.startsWith(item.href)
+              const active = item.href !== '#' && pathname.startsWith(item.href)
 
               return (
                 <Link
