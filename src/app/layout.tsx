@@ -28,11 +28,19 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: {
       icon: [
         {
+          url: '/favicon.ico',
+          sizes: 'any',
+        },
+        {
           url: '/icon.svg',
           type: 'image/svg+xml',
         },
       ],
-      apple: '/apple-icon.png',
+      apple: {
+        url: '/apple-icon.png',
+        sizes: '180x180',
+        type: 'image/png',
+      },
     },
   }
 }
